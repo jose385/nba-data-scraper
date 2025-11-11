@@ -1,8 +1,0 @@
-# NBA Robust Data Collection for 2025-10-23
-# Collection Time: 2025-10-23 20:04:15
-# Games Found: 1
-
-## GAMES
-gameId,gameCode,gameStatus,gameStatusText,period,gameClock,gameTimeUTC,gameEt,regulationPeriods,ifNecessary,seriesGameNumber,gameLabel,gameSubLabel,seriesText,seriesConference,poRoundDesc,gameSubtype,isNeutral,homeTeam,awayTeam,gameLeaders,pbOdds,GAME_DATE
-0022500005,20251023/OKCIND,1,7:30 pm ET,0,,2025-10-23T23:30:00Z,2025-10-23T19:30:00Z,4,False,,,,,,,,False,"{'teamId': 1610612754, 'teamName': 'Pacers', 'teamCity': 'Indiana', 'teamTricode': 'IND', 'wins': 0, 'losses': 0, 'score': 0, 'seed': None, 'inBonus': None, 'timeoutsRemaining': 0, 'periods': [{'period': 1, 'periodType': 'REGULAR', 'score': 0}, {'period': 2, 'periodType': 'REGULAR', 'score': 0}, {'period': 3, 'periodType': 'REGULAR', 'score': 0}, {'period': 4, 'periodType': 'REGULAR', 'score': 0}]}","{'teamId': 1610612760, 'teamName': 'Thunder', 'teamCity': 'Oklahoma City', 'teamTricode': 'OKC', 'wins': 1, 'losses': 0, 'score': 0, 'seed': None, 'inBonus': None, 'timeoutsRemaining': 0, 'periods': [{'period': 1, 'periodType': 'REGULAR', 'score': 0}, {'period': 2, 'periodType': 'REGULAR', 'score': 0}, {'period': 3, 'periodType': 'REGULAR', 'score': 0}, {'period': 4, 'periodType': 'REGULAR', 'score': 0}]}","{'homeLeaders': {'personId': 0, 'name': '', 'jerseyNum': '', 'position': '', 'teamTricode': 'IND', 'playerSlug': None, 'points': 0, 'rebounds': 0, 'assists': 0}, 'awayLeaders': {'personId': 0, 'name': '', 'jerseyNum': '', 'position': '', 'teamTricode': 'OKC', 'playerSlug': None, 'points': 0, 'rebounds': 0, 'assists': 0}}","{'team': None, 'odds': 0.0, 'suspended': 0}",2025-10-23
-
