@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-STREAMLINED NBA Data Backfill - Claude-Optimized Version
+STREAMLINED NBA Data Backfill - Claude-Optimized Version with ESPN Integration
 Focuses on collecting only the data Claude cannot research:
 - NBA tracking data (impossible to get elsewhere)
 - Shot chart with defensive context
 - Play-by-play with advanced metrics
 
+Supports both stats.nba.com API and ESPN API for maximum reliability.
 Claude will research: lineups, injuries, referee assignments, recent trends, etc.
 """
 
@@ -101,6 +102,150 @@ class NBARateLimiter:
 nba_rate_limiter = NBARateLimiter()
 
 # ============================================================================
+# ESPN NBA API CLIENT - RELIABLE ALTERNATIVE
+# ============================================================================
+
+class ESPNNBADataCollector:
+    """ESPN NBA API client - much more reliable than stats.nba.com"""
+    
+    def __init__(self):
+        self.base_url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+        self.timeout = 15  # Faster than NBA API
+        self.delay = 0.5   # Much less aggressive rate limiting needed
+        self.last_call = 0
+        
+        # ESPN-specific headers (optional but helps)
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (compatible NBA data collector)',
+            'Accept': 'application/json',
+            'Accept-Encoding': 'gzip, deflate'
+        }
+    
+    def _rate_limit(self):
+        """Light rate limiting for ESPN"""
+        time_since_last = time.time() - self.last_call
+        if time_since_last < self.delay:
+            time.sleep(self.delay - time_since_last)
+        self.last_call = time.time()
+    
+    def get_scoreboard_data(self, date_str):
+        """Get NBA games from ESPN scoreboard"""
+        self._rate_limit()
+        
+        url = f"{self.base_url}/scoreboard"
+        
+        # ESPN uses YYYYMMDD format
+        espn_date = date_str.replace('-', '')
+        params = {'dates': espn_date}
+        
+        try:
+            response = requests.get(
+                url, 
+                params=params, 
+                headers=self.headers, 
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"   ⚠️ ESPN scoreboard request failed: {e}")
+            return None
+    
+    def get_game_details(self, game_id):
+        """Get detailed game information from ESPN"""
+        self._rate_limit()
+        
+        url = f"{self.base_url}/summary"
+        params = {'event': game_id}
+        
+        try:
+            response = requests.get(
+                url, 
+                params=params, 
+                headers=self.headers, 
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"   ⚠️ ESPN game details request failed: {e}")
+            return None
+    
+    def get_play_by_play_data(self, game_id):
+        """Get play-by-play from ESPN (if available)"""
+        self._rate_limit()
+        
+        url = f"{self.base_url}/playbyplay"
+        params = {'event': game_id}
+        
+        try:
+            response = requests.get(
+                url, 
+                params=params, 
+                headers=self.headers, 
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"   ⚠️ ESPN play-by-play request failed: {e}")
+            return None
+
+# Global ESPN client
+espn_nba_collector = ESPNNBADataCollector()
+
+# ============================================================================
+# UTILITY FUNCTIONS FOR DATA PARSING
+# ============================================================================
+
+def parse_made_attempted(stat_str):
+    """Parse '5-10' format into (made, attempted)"""
+    try:
+        if '-' in stat_str:
+            made, attempted = stat_str.split('-')
+            return int(made), int(attempted)
+        else:
+            return 0, 0
+    except:
+        return 0, 0
+
+def convert_minutes(min_str):
+    """Convert 'MM:SS' to decimal minutes"""
+    try:
+        if ':' in min_str:
+            minutes, seconds = min_str.split(':')
+            return int(minutes) + int(seconds) / 60.0
+        else:
+            return float(min_str) if min_str.replace('.', '').isdigit() else 0.0
+    except:
+        return 0.0
+
+def safe_int(value):
+    """Safely convert to int"""
+    try:
+        return int(float(value)) if value and str(value) != '--' else 0
+    except:
+        return 0
+
+def safe_float(value):
+    """Safely convert to float"""
+    try:
+        return float(value) if value and str(value) != '--' else 0.0
+    except:
+        return 0.0
+
+def convert_clock_to_seconds(clock_str):
+    """Convert 'MM:SS' clock to seconds remaining"""
+    try:
+        if ':' in clock_str:
+            minutes, seconds = clock_str.split(':')
+            return int(minutes) * 60 + int(seconds)
+        else:
+            return 0
+    except:
+        return 0
+
+# ============================================================================
 # NBA PLACEHOLDER DATA GENERATOR (for testing only)
 # ============================================================================
 
@@ -145,7 +290,7 @@ class NBAPlaceholderGenerator:
             'WAS': {'id': 1610612764, 'name': 'Washington Wizards'}
         }
         
-    def generate_daily_games(self, date_str: str) -> List[Dict]:
+    def generate_daily_games(self, date_str):
         """Generate realistic NBA daily schedule"""
         date_obj = datetime.strptime(date_str, '%Y-%m-%d')
         
@@ -204,7 +349,7 @@ class NBAPlaceholderGenerator:
         self.game_id_counter += num_games
         return games
 
-def generate_realistic_nba_plays(game_id: str, game_date: str, home_team: str, away_team: str) -> pd.DataFrame:
+def generate_realistic_nba_plays(game_id, game_date, home_team, away_team):
     """Generate realistic NBA play-by-play data with advanced metrics"""
     
     # NBA event types
@@ -324,7 +469,7 @@ def generate_realistic_nba_plays(game_id: str, game_date: str, home_team: str, a
     
     return pd.DataFrame(plays_data)
 
-def generate_nba_shot_chart(game_id: str, num_shots: int = 85) -> pd.DataFrame:
+def generate_nba_shot_chart(game_id, num_shots=85):
     """Generate realistic shot chart data"""
     
     shots_data = []
@@ -377,7 +522,7 @@ def generate_nba_shot_chart(game_id: str, num_shots: int = 85) -> pd.DataFrame:
     
     return pd.DataFrame(shots_data)
 
-def generate_nba_box_scores(game_id: str, teams: List[str]) -> pd.DataFrame:
+def generate_nba_box_scores(game_id, teams):
     """Generate realistic box score data"""
     
     box_data = []
@@ -445,10 +590,10 @@ def generate_nba_box_scores(game_id: str, teams: List[str]) -> pd.DataFrame:
     return pd.DataFrame(box_data)
 
 # ============================================================================
-# REAL NBA DATA COLLECTION FUNCTIONS
+# ORIGINAL NBA API DATA COLLECTION FUNCTIONS
 # ============================================================================
 
-def collect_real_nba_games(date_str: str) -> List[Dict]:
+def collect_real_nba_games(date_str):
     """Collect real NBA games from NBA API"""
     
     if not REAL_NBA_IMPORTS['nba_api']:
@@ -494,7 +639,7 @@ def collect_real_nba_games(date_str: str) -> List[Dict]:
         print(f"   ❌ NBA API scoreboard failed: {e}")
         raise
 
-def collect_real_nba_playbyplay(game_id: str) -> pd.DataFrame:
+def collect_real_nba_playbyplay(game_id):
     """Collect real play-by-play data from NBA API"""
     
     if not REAL_NBA_IMPORTS['nba_api']:
@@ -533,7 +678,7 @@ def collect_real_nba_playbyplay(game_id: str) -> pd.DataFrame:
         print(f"   ❌ Play-by-play collection failed: {e}")
         return pd.DataFrame()
 
-def collect_real_nba_boxscore(game_id: str) -> pd.DataFrame:
+def collect_real_nba_boxscore(game_id):
     """Collect real box score data from NBA API"""
     
     if not REAL_NBA_IMPORTS['nba_api']:
@@ -565,10 +710,254 @@ def collect_real_nba_boxscore(game_id: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 # ============================================================================
-# CORE NBA DATA COLLECTION FUNCTIONS
+# ESPN NBA DATA COLLECTION FUNCTIONS
 # ============================================================================
 
-def collect_nba_game_info(date_str: str, out_dir: str, use_placeholder: bool = False) -> str:
+def fetch_espn_nba_schedule(date_str):
+    """Collect NBA games using ESPN API - Alternative to collect_real_nba_games"""
+    
+    print(f"   📡 Calling ESPN NBA API for {date_str} (alternative to stats.nba.com)...")
+    
+    try:
+        data = espn_nba_collector.get_scoreboard_data(date_str)
+        
+        if not data or 'events' not in data:
+            print(f"   ℹ️ No NBA games found on ESPN for {date_str}")
+            return []
+        
+        games = []
+        for event in data['events']:
+            try:
+                # Parse ESPN event structure
+                competition = event.get('competitions', [{}])[0]
+                competitors = competition.get('competitors', [])
+                
+                if len(competitors) < 2:
+                    continue
+                
+                # Find home and away teams
+                home_team = next((c for c in competitors if c.get('homeAway') == 'home'), {})
+                away_team = next((c for c in competitors if c.get('homeAway') == 'away'), {})
+                
+                if not home_team or not away_team:
+                    continue
+                
+                # Extract game information
+                game_info = {
+                    'game_id': event['id'],
+                    'game_date': date_str,
+                    'season_year': int(date_str.split('-')[0]),
+                    'season_type': 'Regular Season',  # ESPN doesn't always specify
+                    
+                    # Team information
+                    'home_team_id': int(home_team.get('id', 0)),
+                    'away_team_id': int(away_team.get('id', 0)),
+                    'home_team_abbrev': home_team.get('team', {}).get('abbreviation', 'HOME'),
+                    'away_team_abbrev': away_team.get('team', {}).get('abbreviation', 'AWAY'),
+                    'home_team_name': home_team.get('team', {}).get('displayName', 'Home Team'),
+                    'away_team_name': away_team.get('team', {}).get('displayName', 'Away Team'),
+                    
+                    # Scores
+                    'home_score': int(home_team.get('score', 0)) if home_team.get('score') else None,
+                    'away_score': int(away_team.get('score', 0)) if away_team.get('score') else None,
+                    'game_status': event.get('status', {}).get('type', {}).get('description', 'Unknown'),
+                    
+                    # Additional context
+                    'arena_name': competition.get('venue', {}).get('fullName', 'Arena'),
+                    'arena_city': competition.get('venue', {}).get('address', {}).get('city', 'City'),
+                    'arena_state': competition.get('venue', {}).get('address', {}).get('state', 'State'),
+                    'attendance': competition.get('attendance', None),
+                    
+                    # Game timing
+                    'game_time_et': event.get('date', ''),
+                    'overtime_periods': 0  # Would need detailed parsing to get this
+                }
+                
+                games.append(game_info)
+                
+            except (KeyError, ValueError, TypeError) as e:
+                print(f"   ⚠️ Skipping malformed ESPN game data: {e}")
+                continue
+        
+        print(f"   ✅ Retrieved {len(games)} NBA games from ESPN")
+        return games
+        
+    except Exception as e:
+        print(f"   ❌ ESPN NBA schedule collection failed: {e}")
+        raise
+
+def extract_espn_nba_boxscores(game_id):
+    """Collect box scores using ESPN API - Alternative to collect_real_nba_boxscore"""
+    
+    print(f"   📡 Getting ESPN box score for game {game_id}...")
+    
+    try:
+        data = espn_nba_collector.get_game_details(game_id)
+        
+        if not data or 'boxscore' not in data:
+            print(f"   ⚠️ No ESPN box score data for game {game_id}")
+            return pd.DataFrame()
+        
+        players_data = []
+        
+        # Parse ESPN boxscore structure
+        boxscore = data['boxscore']
+        
+        for team in boxscore.get('teams', []):
+            team_id = team.get('team', {}).get('id', 0)
+            team_abbrev = team.get('team', {}).get('abbreviation', 'TEAM')
+            
+            # ESPN has statistics in different categories
+            for stat_category in team.get('statistics', []):
+                category_name = stat_category.get('name', '').lower()
+                
+                # We want the main player statistics
+                if 'player' in category_name or len(stat_category.get('athletes', [])) > 0:
+                    
+                    for player in stat_category.get('athletes', []):
+                        try:
+                            athlete = player.get('athlete', {})
+                            stats = player.get('stats', [])
+                            
+                            # ESPN stats order: MIN, FGM-FGA, FG%, 3PM-3PA, 3P%, FTM-FTA, FT%, +/-, REB, AST, STL, BLK, TO, PF, PTS
+                            if len(stats) >= 15:
+                                # Parse field goals
+                                fg_str = stats[1] if len(stats) > 1 else '0-0'
+                                fg_made, fg_att = parse_made_attempted(fg_str)
+                                
+                                # Parse three pointers
+                                three_str = stats[3] if len(stats) > 3 else '0-0'
+                                three_made, three_att = parse_made_attempted(three_str)
+                                
+                                # Parse free throws
+                                ft_str = stats[5] if len(stats) > 5 else '0-0'
+                                ft_made, ft_att = parse_made_attempted(ft_str)
+                                
+                                player_data = {
+                                    'game_id': game_id,
+                                    'player_id': int(athlete.get('id', 0)),
+                                    'player_name': athlete.get('displayName', 'Unknown Player'),
+                                    'team_id': int(team_id),
+                                    'team_abbrev': team_abbrev,
+                                    'position': athlete.get('position', {}).get('abbreviation', 'N/A'),
+                                    'starter': player.get('starter', False),
+                                    
+                                    # Convert ESPN minutes format (MM:SS) to decimal
+                                    'minutes_played': convert_minutes(stats[0] if stats else '0:00'),
+                                    
+                                    # Shooting stats
+                                    'field_goals_made': fg_made,
+                                    'field_goals_attempted': fg_att,
+                                    'field_goal_pct': safe_float(stats[2]) / 100 if len(stats) > 2 else 0,
+                                    'three_pointers_made': three_made,
+                                    'three_pointers_attempted': three_att,
+                                    'three_point_pct': safe_float(stats[4]) / 100 if len(stats) > 4 else 0,
+                                    'free_throws_made': ft_made,
+                                    'free_throws_attempted': ft_att,
+                                    'free_throw_pct': safe_float(stats[6]) / 100 if len(stats) > 6 else 0,
+                                    
+                                    # Other stats
+                                    'plus_minus': safe_int(stats[7]) if len(stats) > 7 else 0,
+                                    'total_rebounds': safe_int(stats[8]) if len(stats) > 8 else 0,
+                                    'assists': safe_int(stats[9]) if len(stats) > 9 else 0,
+                                    'steals': safe_int(stats[10]) if len(stats) > 10 else 0,
+                                    'blocks': safe_int(stats[11]) if len(stats) > 11 else 0,
+                                    'turnovers': safe_int(stats[12]) if len(stats) > 12 else 0,
+                                    'personal_fouls': safe_int(stats[13]) if len(stats) > 13 else 0,
+                                    'points': safe_int(stats[14]) if len(stats) > 14 else 0,
+                                    
+                                    # Calculated advanced stats
+                                    'true_shooting_pct': 0,  # Would need calculation
+                                    'usage_rate': 0,  # Not available in ESPN basic stats
+                                    'distance_traveled': None,  # Not available
+                                    'avg_speed': None,  # Not available
+                                    'touches': None,  # Not available
+                                }
+                                
+                                players_data.append(player_data)
+                                
+                        except (KeyError, ValueError, TypeError, IndexError) as e:
+                            print(f"   ⚠️ Skipping malformed ESPN player data: {e}")
+                            continue
+        
+        if players_data:
+            df = pd.DataFrame(players_data)
+            print(f"   ✅ Retrieved ESPN box scores for {len(df)} players")
+            return df
+        else:
+            print(f"   ⚠️ No valid ESPN player data found for game {game_id}")
+            return pd.DataFrame()
+        
+    except Exception as e:
+        print(f"   ❌ ESPN box score extraction failed: {e}")
+        return pd.DataFrame()
+
+def gather_espn_nba_plays(game_id):
+    """Collect play-by-play using ESPN API - Alternative to collect_real_nba_playbyplay"""
+    
+    print(f"   📡 Getting ESPN play-by-play for game {game_id}...")
+    
+    try:
+        data = espn_nba_collector.get_play_by_play_data(game_id)
+        
+        if not data or 'plays' not in data:
+            print(f"   ⚠️ No ESPN play-by-play data for game {game_id}")
+            return pd.DataFrame()
+        
+        plays_data = []
+        
+        for play in data.get('plays', []):
+            try:
+                play_info = {
+                    'game_id': game_id,
+                    'play_id': f"{game_id}_espn_{play.get('id', 'unknown')}",
+                    'event_num': play.get('sequenceNumber', 0),
+                    'period': play.get('period', {}).get('number', 1),
+                    'clock_time': play.get('clock', {}).get('displayValue', '12:00'),
+                    'clock_seconds_remaining': convert_clock_to_seconds(
+                        play.get('clock', {}).get('displayValue', '12:00')
+                    ),
+                    'event_type': play.get('type', {}).get('text', 'UNKNOWN'),
+                    'play_description': play.get('text', 'No description'),
+                    
+                    # Score information
+                    'score_home': play.get('homeScore', 0),
+                    'score_away': play.get('awayScore', 0),
+                    'score_margin': (play.get('homeScore', 0) - play.get('awayScore', 0)),
+                    
+                    # Player information (if available)
+                    'player1_id': play.get('participants', [{}])[0].get('athlete', {}).get('id', None) if play.get('participants') else None,
+                    'player1_name': play.get('participants', [{}])[0].get('athlete', {}).get('displayName', None) if play.get('participants') else None,
+                    
+                    # ESPN doesn't provide advanced tracking in basic play-by-play
+                    'shot_attempted': 'shot' in play.get('type', {}).get('text', '').lower(),
+                    'shot_made': 'made' in play.get('text', '').lower(),
+                    'data_source': 'ESPN',
+                    'tracking_data_available': False,
+                }
+                
+                plays_data.append(play_info)
+                
+            except (KeyError, ValueError, TypeError) as e:
+                print(f"   ⚠️ Skipping malformed ESPN play: {e}")
+                continue
+        
+        if plays_data:
+            df = pd.DataFrame(plays_data)
+            print(f"   ✅ Retrieved {len(df)} ESPN plays")
+            return df
+        else:
+            return pd.DataFrame()
+        
+    except Exception as e:
+        print(f"   ❌ ESPN play-by-play gathering failed: {e}")
+        return pd.DataFrame()
+
+# ============================================================================
+# CORE NBA DATA COLLECTION FUNCTIONS (ORIGINAL NBA API)
+# ============================================================================
+
+def collect_nba_game_info(date_str, out_dir, use_placeholder=False):
     """Collect NBA game information - basic context"""
     
     out_file = os.path.join(out_dir, f'nba_game_info_{date_str}.parquet')
@@ -609,7 +998,7 @@ def collect_nba_game_info(date_str: str, out_dir: str, use_placeholder: bool = F
     print(f"✅ NBA Game Info: {len(df)} games → {out_file}")
     return out_file
 
-def collect_nba_plays(date_str: str, out_dir: str, use_placeholder: bool = False) -> str:
+def collect_nba_plays(date_str, out_dir, use_placeholder=False):
     """Collect NBA play-by-play data - THE CORE VALUE for betting analysis"""
     
     out_file = os.path.join(out_dir, f'nba_plays_{date_str}.parquet')
@@ -679,7 +1068,7 @@ def collect_nba_plays(date_str: str, out_dir: str, use_placeholder: bool = False
     print(f"✅ NBA Plays: {len(df)} plays → {out_file}")
     return out_file
 
-def collect_nba_shot_chart(date_str: str, out_dir: str, use_placeholder: bool = False) -> str:
+def collect_nba_shot_chart(date_str, out_dir, use_placeholder=False):
     """Collect NBA shot chart data - CRITICAL for player props"""
     
     out_file = os.path.join(out_dir, f'nba_shot_chart_{date_str}.parquet')
@@ -724,7 +1113,7 @@ def collect_nba_shot_chart(date_str: str, out_dir: str, use_placeholder: bool = 
     print(f"✅ NBA Shot Chart: {len(df)} shots → {out_file}")
     return out_file
 
-def collect_nba_box_scores(date_str: str, out_dir: str, use_placeholder: bool = False) -> str:
+def collect_nba_box_scores(date_str, out_dir, use_placeholder=False):
     """Collect NBA box scores - ESSENTIAL for player props"""
     
     out_file = os.path.join(out_dir, f'nba_box_scores_{date_str}.parquet')
@@ -791,34 +1180,318 @@ def collect_nba_box_scores(date_str: str, out_dir: str, use_placeholder: bool = 
     return out_file
 
 # ============================================================================
+# ESPN-POWERED COLLECTION FUNCTIONS (Alternative methods)
+# ============================================================================
+
+def collect_nba_games_via_espn(date_str, out_dir, use_placeholder=False):
+    """ESPN-powered game collection - Alternative to collect_nba_game_info"""
+    
+    out_file = os.path.join(out_dir, f'nba_game_info_espn_{date_str}.parquet')
+    
+    if use_placeholder:
+        print(f"🔧 Generating placeholder NBA games for {date_str} (ESPN mode)...")
+        generator = NBAPlaceholderGenerator()
+        games = generator.generate_daily_games(date_str)
+        
+        if not games:
+            df = pd.DataFrame(columns=['game_date', 'game_id'])
+            df.to_parquet(out_file, index=False)
+            print(f"✅ No NBA games scheduled for {date_str}")
+            return out_file
+        
+        df = pd.DataFrame(games)
+        
+    else:
+        print(f"📡 Collecting NBA games via ESPN for {date_str}...")
+        
+        try:
+            games = fetch_espn_nba_schedule(date_str)
+            
+            if not games:
+                print(f"   ⚠️ No NBA games found on ESPN for {date_str}")
+                df = pd.DataFrame(columns=['game_date', 'game_id'])
+            else:
+                df = pd.DataFrame(games)
+                print(f"   ✅ ESPN NBA games: {len(df)} games")
+                
+        except Exception as e:
+            print(f"   ❌ ESPN game collection failed: {e}")
+            print(f"   💡 Falling back to placeholder mode")
+            return collect_nba_games_via_espn(date_str, out_dir, use_placeholder=True)
+    
+    df.to_parquet(out_file, index=False)
+    print(f"✅ ESPN NBA Game Info: {len(df)} games → {out_file}")
+    return out_file
+
+def collect_nba_boxscores_via_espn(date_str, out_dir, use_placeholder=False):
+    """ESPN-powered box score collection - Alternative to collect_nba_box_scores"""
+    
+    out_file = os.path.join(out_dir, f'nba_box_scores_espn_{date_str}.parquet')
+    
+    # Get games for this date first
+    game_info_file = os.path.join(out_dir, f'nba_game_info_espn_{date_str}.parquet')
+    
+    if not os.path.exists(game_info_file):
+        print(f"   ⚠️ ESPN game info file not found, collecting first...")
+        collect_nba_games_via_espn(date_str, out_dir, use_placeholder)
+    
+    try:
+        games_df = pd.read_parquet(game_info_file)
+        if games_df.empty:
+            df = pd.DataFrame(columns=['game_id', 'player_id'])
+            df.to_parquet(out_file, index=False)
+            print(f"✅ No ESPN box scores for {date_str} (no games)")
+            return out_file
+    except Exception as e:
+        print(f"   ❌ Could not read ESPN game info: {e}")
+        df = pd.DataFrame(columns=['game_id', 'player_id'])
+        df.to_parquet(out_file, index=False)
+        return out_file
+    
+    if use_placeholder:
+        print(f"🔧 Generating placeholder NBA box scores for {date_str} (ESPN mode)...")
+        
+        all_box_scores = []
+        for _, game in games_df.iterrows():
+            game_id = game['game_id']
+            home_team = game.get('home_team_abbrev', 'HOME')
+            away_team = game.get('away_team_abbrev', 'AWAY')
+            
+            box_scores = generate_nba_box_scores(game_id, [home_team, away_team])
+            all_box_scores.append(box_scores)
+        
+        if all_box_scores:
+            df = pd.concat(all_box_scores, ignore_index=True)
+        else:
+            df = pd.DataFrame(columns=['game_id', 'player_id'])
+        
+    else:
+        print(f"📡 Collecting NBA box scores via ESPN for {date_str}...")
+        
+        all_box_scores = []
+        
+        for _, game in games_df.iterrows():
+            game_id = game['game_id']
+            
+            try:
+                box_scores = extract_espn_nba_boxscores(game_id)
+                if not box_scores.empty:
+                    all_box_scores.append(box_scores)
+                    
+            except Exception as e:
+                print(f"   ❌ Failed to get ESPN box scores for game {game_id}: {e}")
+                continue
+        
+        if all_box_scores:
+            df = pd.concat(all_box_scores, ignore_index=True)
+            print(f"   ✅ ESPN NBA box scores: {len(df)} player records")
+        else:
+            print(f"   ⚠️ No ESPN box score data collected, using placeholder")
+            return collect_nba_boxscores_via_espn(date_str, out_dir, use_placeholder=True)
+    
+    df.to_parquet(out_file, index=False)
+    print(f"✅ ESPN NBA Box Scores: {len(df)} players → {out_file}")
+    return out_file
+
+def collect_nba_plays_via_espn(date_str, out_dir, use_placeholder=False):
+    """ESPN-powered play collection - Alternative to collect_nba_plays"""
+    
+    out_file = os.path.join(out_dir, f'nba_plays_espn_{date_str}.parquet')
+    
+    # Get games for this date first
+    game_info_file = os.path.join(out_dir, f'nba_game_info_espn_{date_str}.parquet')
+    
+    if not os.path.exists(game_info_file):
+        print(f"   ⚠️ ESPN game info file not found, collecting first...")
+        collect_nba_games_via_espn(date_str, out_dir, use_placeholder)
+    
+    try:
+        games_df = pd.read_parquet(game_info_file)
+        if games_df.empty:
+            df = pd.DataFrame(columns=['game_id', 'play_id'])
+            df.to_parquet(out_file, index=False)
+            print(f"✅ No ESPN plays for {date_str} (no games)")
+            return out_file
+    except Exception as e:
+        print(f"   ❌ Could not read ESPN game info: {e}")
+        df = pd.DataFrame(columns=['game_id', 'play_id'])
+        df.to_parquet(out_file, index=False)
+        return out_file
+    
+    if use_placeholder:
+        print(f"🔧 Generating placeholder NBA plays for {date_str} (ESPN mode)...")
+        
+        all_plays = []
+        for _, game in games_df.iterrows():
+            game_id = game['game_id']
+            home_team = game.get('home_team_abbrev', 'HOME')
+            away_team = game.get('away_team_abbrev', 'AWAY')
+            
+            game_plays = generate_realistic_nba_plays(game_id, date_str, home_team, away_team)
+            all_plays.append(game_plays)
+        
+        if all_plays:
+            df = pd.concat(all_plays, ignore_index=True)
+        else:
+            df = pd.DataFrame(columns=['game_id', 'play_id'])
+        
+    else:
+        print(f"📡 Collecting NBA plays via ESPN for {date_str}...")
+        
+        all_plays = []
+        
+        for _, game in games_df.iterrows():
+            game_id = game['game_id']
+            
+            try:
+                game_plays = gather_espn_nba_plays(game_id)
+                if not game_plays.empty:
+                    all_plays.append(game_plays)
+                    
+            except Exception as e:
+                print(f"   ❌ Failed to get ESPN plays for game {game_id}: {e}")
+                continue
+        
+        if all_plays:
+            df = pd.concat(all_plays, ignore_index=True)
+            print(f"   ✅ ESPN NBA plays: {len(df)} plays from {len(all_plays)} games")
+        else:
+            print(f"   ⚠️ No ESPN play-by-play data collected, using placeholder")
+            return collect_nba_plays_via_espn(date_str, out_dir, use_placeholder=True)
+    
+    df.to_parquet(out_file, index=False)
+    print(f"✅ ESPN NBA Plays: {len(df)} plays → {out_file}")
+    return out_file
+
+def collect_nba_shots_via_espn(date_str, out_dir, use_placeholder=False):
+    """ESPN-powered shot chart collection"""
+    
+    out_file = os.path.join(out_dir, f'nba_shot_chart_espn_{date_str}.parquet')
+    
+    # Get games for this date first
+    game_info_file = os.path.join(out_dir, f'nba_game_info_espn_{date_str}.parquet')
+    
+    try:
+        games_df = pd.read_parquet(game_info_file)
+        if games_df.empty:
+            df = pd.DataFrame(columns=['game_id', 'shot_id'])
+            df.to_parquet(out_file, index=False)
+            print(f"✅ No ESPN shot chart for {date_str} (no games)")
+            return out_file
+    except Exception as e:
+        print(f"   ❌ Could not read ESPN game info: {e}")
+        df = pd.DataFrame(columns=['game_id', 'shot_id'])
+        df.to_parquet(out_file, index=False)
+        return out_file
+    
+    print(f"🔧 Generating placeholder NBA shot chart for {date_str} (ESPN mode)...")
+    
+    all_shots = []
+    for _, game in games_df.iterrows():
+        game_id = game['game_id']
+        shots = generate_nba_shot_chart(game_id)
+        all_shots.append(shots)
+    
+    if all_shots:
+        df = pd.concat(all_shots, ignore_index=True)
+    else:
+        df = pd.DataFrame(columns=['game_id', 'shot_id'])
+    
+    df.to_parquet(out_file, index=False)
+    print(f"✅ ESPN NBA Shot Chart: {len(df)} shots → {out_file}")
+    return out_file
+
+# ============================================================================
 # MAIN ORCHESTRATION
 # ============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(description='Streamlined NBA data backfill - Claude optimized')
+    parser = argparse.ArgumentParser(description='Streamlined NBA data backfill - Claude optimized with ESPN support')
     parser.add_argument('--start', required=True, help='Start date (YYYY-MM-DD)')
     parser.add_argument('--end', required=True, help='End date (YYYY-MM-DD)')
     parser.add_argument('--out-dir', default='stage', help='Output directory')
-    parser.add_argument('--real-data', action='store_true', help='Use real NBA API data (recommended)')
+    parser.add_argument('--real-data', action='store_true', help='Use real NBA API data (stats.nba.com)')
+    parser.add_argument('--espn-data', action='store_true', help='Use ESPN API data (more reliable)')
     parser.add_argument('--minimal', action='store_true', help='Collect only games and box scores')
     parser.add_argument('--placeholder', action='store_true', help='Force placeholder mode for testing')
     
     args = parser.parse_args()
     
-    # Determine data mode
-    use_placeholder = args.placeholder or (not args.real_data and not REAL_NBA_IMPORTS['nba_api'])
-    
     print(f"🏀 STREAMLINED NBA backfill: {args.start} to {args.end}")
     
-    if use_placeholder:
-        print(f"🔧 PLACEHOLDER MODE: Using generated test data")
-        print(f"   💡 To use real data: use --real-data flag")
-    else:
-        print(f"📡 REAL DATA MODE: Using live NBA API")
+    # Determine data mode and collection functions
+    if args.espn_data and not args.placeholder:
+        print(f"📺 ESPN DATA MODE: Using ESPN NBA API (more reliable)")
+        use_placeholder = False
+        
+        if args.minimal:
+            collection_functions = [
+                ('ESPN Game Info', collect_nba_games_via_espn),
+                ('ESPN Box Scores', collect_nba_boxscores_via_espn),
+            ]
+        else:
+            collection_functions = [
+                ('ESPN Game Info', collect_nba_games_via_espn),
+                ('ESPN Plays', collect_nba_plays_via_espn),
+                ('ESPN Shot Chart', collect_nba_shots_via_espn),
+                ('ESPN Box Scores', collect_nba_boxscores_via_espn),
+            ]
+        
+    elif args.real_data and not args.placeholder:
+        print(f"📡 REAL DATA MODE: Using live NBA API (stats.nba.com)")
         if not REAL_NBA_IMPORTS['nba_api']:
             print(f"❌ nba_api not available! Install with: pip install nba_api")
             return
         print(f"   ✅ NBA API ready for data collection")
+        use_placeholder = False
+        
+        if args.minimal:
+            collection_functions = [
+                ('Game Info', collect_nba_game_info),
+                ('Box Scores', collect_nba_box_scores),
+            ]
+        else:
+            collection_functions = [
+                ('Game Info', collect_nba_game_info),
+                ('Play-by-Play', collect_nba_plays),
+                ('Shot Chart', collect_nba_shot_chart),
+                ('Box Scores', collect_nba_box_scores),
+            ]
+    
+    else:
+        print(f"🔧 PLACEHOLDER MODE: Using generated test data")
+        if args.espn_data:
+            print(f"   💡 ESPN placeholder mode - generates ESPN-style files")
+        print(f"   💡 To use real data: use --real-data or --espn-data flag")
+        use_placeholder = True
+        
+        # Use ESPN functions for placeholder if ESPN mode requested
+        if args.espn_data:
+            if args.minimal:
+                collection_functions = [
+                    ('ESPN Game Info', collect_nba_games_via_espn),
+                    ('ESPN Box Scores', collect_nba_boxscores_via_espn),
+                ]
+            else:
+                collection_functions = [
+                    ('ESPN Game Info', collect_nba_games_via_espn),
+                    ('ESPN Plays', collect_nba_plays_via_espn),
+                    ('ESPN Shot Chart', collect_nba_shots_via_espn),
+                    ('ESPN Box Scores', collect_nba_boxscores_via_espn),
+                ]
+        else:
+            if args.minimal:
+                collection_functions = [
+                    ('Game Info', collect_nba_game_info),
+                    ('Box Scores', collect_nba_box_scores),
+                ]
+            else:
+                collection_functions = [
+                    ('Game Info', collect_nba_game_info),
+                    ('Play-by-Play', collect_nba_plays),
+                    ('Shot Chart', collect_nba_shot_chart),
+                    ('Box Scores', collect_nba_box_scores),
+                ]
     
     print(f"📁 Output directory: {args.out_dir}")
     
@@ -839,20 +1512,10 @@ def main():
     
     os.makedirs(args.out_dir, exist_ok=True)
     
-    # Define what to collect based on mode
+    # Show collection mode
     if args.minimal:
-        collection_functions = [
-            ('Game Info', collect_nba_game_info),
-            ('Box Scores', collect_nba_box_scores),
-        ]
         print(f"🎯 MINIMAL MODE: Collecting only essential NBA data")
     else:
-        collection_functions = [
-            ('Game Info', collect_nba_game_info),
-            ('Play-by-Play', collect_nba_plays),
-            ('Shot Chart', collect_nba_shot_chart),
-            ('Box Scores', collect_nba_box_scores),
-        ]
         print(f"🎯 FULL MODE: Collecting comprehensive NBA data")
     
     print(f"💡 Claude will research: injuries, lineups, referee assignments, trends")
@@ -901,12 +1564,17 @@ def main():
     
     # Next steps guidance
     if use_placeholder:
-        print(f"\n🔧 PLACEHOLDER MODE COMPLETED:")
+        mode_name = "ESPN PLACEHOLDER" if args.espn_data else "NBA PLACEHOLDER"
+        print(f"\n🔧 {mode_name} MODE COMPLETED:")
         print(f"   ✅ Test NBA data generated successfully")
         print(f"   🎯 Perfect for testing pipeline")
-        print(f"   💡 For real data: use --real-data flag")
+        if args.espn_data:
+            print(f"   💡 For real ESPN data: remove --placeholder flag")
+        else:
+            print(f"   💡 For real data: use --real-data or --espn-data flag")
     else:
-        print(f"\n📡 REAL DATA MODE COMPLETED:")
+        mode_name = "ESPN" if args.espn_data else "NBA API"
+        print(f"\n📡 {mode_name} DATA MODE COMPLETED:")
         print(f"   ✅ Real NBA data collected")
         print(f"   📊 Advanced metrics ready for analysis")
         print(f"   🎯 Ready for Claude betting analysis")
@@ -920,6 +1588,14 @@ def main():
     print(f"   🏀 Your system: Provides impossible-to-get NBA tracking data")
     print(f"   🤖 Claude: Researches injuries, lineups, refs, trends")
     print(f"   🎯 Result: Complete NBA betting analysis with minimal complexity")
+    
+    print(f"\n🚀 USAGE EXAMPLES:")
+    print(f"   # ESPN mode (recommended)")
+    print(f"   python py/nba_enhanced_backfill.py --start 2025-11-09 --end 2025-11-09 --espn-data")
+    print(f"   # NBA API mode")
+    print(f"   python py/nba_enhanced_backfill.py --start 2025-11-09 --end 2025-11-09 --real-data")
+    print(f"   # Placeholder mode")
+    print(f"   python py/nba_enhanced_backfill.py --start 2025-11-09 --end 2025-11-09 --placeholder")
 
 if __name__ == '__main__':
     main()

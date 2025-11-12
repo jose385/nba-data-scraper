@@ -232,6 +232,78 @@ def run_all_tests():
     else:
         print(f"\n⚠️ {tests_failed} test(s) failed. Please check the errors above.")
         return False
+    
+
+def test_real_data_backfill():
+    """Test real NBA API data collection with enhanced settings"""
+    print("\n📡 Testing Real Data Mode...")
+    
+    # Check NBA API availability
+    try:
+        from nba_api.stats.static import teams
+        team_list = teams.get_teams()
+        if not team_list or len(team_list) != 30:
+            print("❌ NBA API not working properly")
+            return False
+        print("✅ NBA API connectivity confirmed")
+    except ImportError:
+        print("⚠️ nba_api not installed - skipping real data test")
+        return True
+    except Exception as e:
+        print(f"⚠️ NBA API error: {e} - skipping real data test")
+        return True
+    
+    # Use a date during regular season with games
+    test_date = datetime(2024, 1, 15)  # Middle of season
+    date_str = test_date.strftime('%Y-%m-%d')
+    
+    cmd = [
+        sys.executable, 
+        'py/nba_enhanced_backfill.py',
+        '--start', date_str,
+        '--end', date_str,
+        '--real-data',
+        '--minimal',
+        '--out-dir', 'test_real_output'
+    ]
+    
+    print(f"🚀 Running: {' '.join(cmd)}")
+    print("⚠️ Using enhanced NBA API settings (longer timeouts)...")
+    
+    try:
+        # Increased timeout to 180 seconds for real NBA API
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+        
+        if result.returncode == 0:
+            print("✅ Real data backfill successful")
+            
+            output_dir = Path('test_real_output')
+            if output_dir.exists():
+                files = list(output_dir.glob('*.parquet'))
+                print(f"📁 Generated {len(files)} real data files")
+                
+                # Show file details
+                for file in files:
+                    size_kb = file.stat().st_size / 1024
+                    print(f"   • {file.name} ({size_kb:.1f} KB)")
+                
+                return True
+            else:
+                print("❌ No real data output generated")
+                return False
+        else:
+            print(f"⚠️ Real data backfill failed:")
+            print(f"STDOUT: {result.stdout}")
+            print(f"STDERR: {result.stderr}")
+            return False
+            
+    except subprocess.TimeoutExpired:
+        print("❌ Real data backfill timed out after 180 seconds")
+        print("💡 NBA API may be slow - this is normal, try again later")
+        return False
+    except Exception as e:
+        print(f"❌ Real data backfill error: {e}")
+        return False
 
 if __name__ == "__main__":
     success = run_all_tests()
