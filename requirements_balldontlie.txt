@@ -1,0 +1,105 @@
+# NBA Betting Analysis - BallDontLie API Edition
+# Simple, clean requirements without complex NBA API dependencies
+
+# ============================================================================
+# CORE DATA HANDLING & PROCESSING  
+# ============================================================================
+pandas>=2.1.0                  # Data manipulation
+pyarrow>=14.0.0                # Fast parquet I/O
+numpy>=1.25.0                  # Numerical computing
+
+# ============================================================================
+# DATABASE & CONNECTIVITY
+# ============================================================================
+psycopg2-binary>=2.9.9         # PostgreSQL adapter
+requests>=2.31.0               # HTTP library (for BallDontLie API)
+
+# ============================================================================
+# UTILITIES & HELPERS  
+# ============================================================================
+tqdm>=4.66.0                   # Progress bars
+python-dotenv>=1.0.0           # Environment variables
+python-dateutil>=2.8.0         # Date parsing
+
+# ============================================================================
+# BALLDONTLIE API
+# ============================================================================
+# No special library needed! Just requests
+# API Docs: https://docs.balldontlie.io/
+# 
+# Free Tier:
+# - 30 requests/minute
+# - No authentication required
+# 
+# With API Key (recommended):
+# - 60 requests/minute
+# - Get key at: https://balldontlie.io/
+#
+# Provides:
+# - Games (schedule, scores, results)
+# - Stats (box scores, player stats)
+# - Teams (all 30 NBA teams)
+# - Players (all active players)
+# - Season Averages (player season stats)
+#
+# Rate Limiting:
+# - Built into our client (2 seconds between requests for free tier)
+# - Much more reliable than stats.nba.com
+# - No Cloudflare blocking issues
+#
+# ============================================================================
+# WHAT BALLDONTLIE PROVIDES
+# ============================================================================
+# ✅ Games: Basic schedule, scores, status
+# ✅ Box Scores: Traditional stats (pts, reb, ast, fg%, 3pt%, etc.)
+# ✅ Teams: Team info, conference, division
+# ✅ Players: Player info, position, team
+# ✅ Season Averages: Player season statistics
+#
+# ❌ NOT Available (Claude researches these):
+# - Play-by-play data
+# - Shot charts
+# - Advanced tracking (speed, distance traveled)
+# - Injury reports
+# - Starting lineups
+# - Referee assignments
+# - Betting lines/odds
+#
+# This is actually PERFECT for our use case:
+# - We collect the hard-to-get game/stat data
+# - Claude researches the contextual information
+# - Much simpler and more reliable than nba_api
+#
+# ============================================================================
+# OPTIONAL ENHANCEMENTS
+# ============================================================================
+# For data analysis
+scipy>=1.11.0                  # Statistical computing (optional)
+# matplotlib>=3.8.0            # Plotting (optional)
+
+# For faster processing
+# polars>=0.20.0               # Alternative to pandas (optional)
+
+# ============================================================================
+# DEVELOPMENT & TESTING
+# ============================================================================
+# pytest>=7.4.0                # Testing (optional)
+# black>=23.12.0               # Code formatting (optional)
+
+# ============================================================================
+# INSTALLATION
+# ============================================================================
+# pip install -r requirements_balldontlie.txt
+#
+# Or minimal installation:
+# pip install pandas pyarrow numpy requests psycopg2-binary python-dotenv
+#
+# ============================================================================
+# GETTING API KEY (OPTIONAL BUT RECOMMENDED)
+# ============================================================================
+# 1. Go to: https://www.balldontlie.io/
+# 2. Sign up for free account
+# 3. Get your API key
+# 4. Add to .env: BALLDONTLIE_API_KEY=your_key_here
+# 5. This increases rate limit from 30 to 60 requests/minute
+#
