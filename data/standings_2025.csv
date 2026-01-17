@@ -1,0 +1,31 @@
+team_id,team_name,team_abbr,team_city,team_conference,team_division,wins,losses,win_pct,conference_rank,conference_record,division_rank,division_record,home_record,home_wins,home_losses,road_record,road_wins,road_losses,season
+9,Detroit Pistons,DET,Detroit,East,Central,29,10,0.744,1,20-6 ,1,7-3,15-4,15,4,13-6,13,6,2025
+2,Boston Celtics,BOS,Boston,East,Atlantic,25,15,0.625,2,18-9 ,1,6-4,12-7,12,7,13-8,13,8,2025
+20,New York Knicks,NYK,New York,East,Atlantic,25,16,0.61,3,18-11,2,5-3,16-4,16,4,8-12,8,12,2025
+28,Toronto Raptors,TOR,Toronto,East,Atlantic,25,18,0.581,4,22-12,3,4-8,13-10,13,10,12-8,12,8,2025
+6,Cleveland Cavaliers,CLE,Cleveland,East,Central,24,19,0.558,6,16-13,2,7-3,14-10,14,10,10-9,10,9,2025
+22,Orlando Magic,ORL,Orlando,East,Southeast,23,18,0.561,5,15-14,1,5-4,13-6,13,6,9-11,9,11,2025
+23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,22,18,0.55,7,17-15,4,8-4,10-11,10,11,12-7,12,7,2025
+16,Miami Heat,MIA,Miami,East,Southeast,21,20,0.512,8,12-12,2,3-3,14-7,14,7,7-13,7,13,2025
+1,Atlanta Hawks,ATL,Atlanta,East,Southeast,20,23,0.465,9,10-15,3,4-3,7-11,7,11,13-12,13,12,2025
+5,Chicago Bulls,CHI,Chicago,East,Central,19,22,0.463,10,13-15,3,3-7,12-9,12,9,7-13,7,13,2025
+17,Milwaukee Bucks,MIL,Milwaukee,East,Central,17,24,0.415,11,13-14,4,5-4,9-10,9,10,8-14,8,14,2025
+4,Charlotte Hornets,CHA,Charlotte,East,Southeast,15,26,0.366,12,11-18,4,4-4,7-12,7,12,8-14,8,14,2025
+3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,12,27,0.308,13,9-16 ,5,3-7,6-15,6,15,6-12,6,12,2025
+30,Washington Wizards,WAS,Washington,East,Southeast,10,30,0.25,14,7-18 ,5,2-4,6-13,6,13,4-17,4,17,2025
+12,Indiana Pacers,IND,Indiana,East,Central,10,32,0.238,15,7-20 ,5,2-7,8-16,8,16,2-16,2,16,2025
+21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,35,7,0.833,1,28-6 ,1,7-2,20-2,20,2,15-4,15,4,2025
+27,San Antonio Spurs,SAS,San Antonio,West,Southwest,28,13,0.683,2,15-11,1,7-1,14-5,14,5,13-8,13,8,2025
+8,Denver Nuggets,DEN,Denver,West,Northwest,28,13,0.683,3,18-7 ,2,4-1,11-6,11,6,17-7,17,7,2025
+18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,27,15,0.643,4,14-11,3,4-4,15-6,15,6,12-9,12,9,2025
+11,Houston Rockets,HOU,Houston,West,Southwest,24,15,0.615,5,13-14,2,2-4,13-3,13,3,11-12,11,12,2025
+14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,24,15,0.615,6,18-10,1,4-5,11-8,11,8,13-7,13,7,2025
+24,Phoenix Suns,PHX,Phoenix,West,Pacific,24,17,0.585,7,20-13,2,8-4,14-5,14,5,10-12,10,12,2025
+10,Golden State Warriors,GSW,Golden State,West,Pacific,23,19,0.548,8,15-12,3,5-3,15-6,15,6,8-13,8,13,2025
+25,Portland Trail Blazers,POR,Portland,West,Northwest,20,22,0.476,9,16-14,4,4-4,11-10,11,10,9-12,9,12,2025
+13,LA Clippers,LAC,LA,West,Pacific,18,23,0.439,10,10-14,4,4-4,11-9,11,9,7-14,7,14,2025
+15,Memphis Grizzlies,MEM,Memphis,West,Southwest,17,23,0.425,11,14-13,3,5-3,9-11,9,11,8-11,8,11,2025
+7,Dallas Mavericks,DAL,Dallas,West,Southwest,16,26,0.381,12,9-18 ,4,3-6,12-11,12,11,4-14,4,14,2025
+29,Utah Jazz,UTA,Utah,West,Northwest,14,27,0.341,13,8-19 ,5,0-8,9-12,9,12,5-15,5,15,2025
+26,Sacramento Kings,SAC,Sacramento,West,Pacific,12,30,0.286,14,8-24 ,5,2-7,9-13,9,13,3-17,3,17,2025
+19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,10,34,0.227,15,4-24 ,5,3-6,7-18,7,18,3-16,3,16,2025

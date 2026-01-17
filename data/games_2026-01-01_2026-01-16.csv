@@ -1,0 +1,122 @@
+game_id,date,season,status,period,time,postseason,home_team_id,home_team_name,home_team_abbr,home_team_city,home_team_conference,home_team_division,home_score,visitor_team_id,visitor_team_name,visitor_team_abbr,visitor_team_city,visitor_team_conference,visitor_team_division,visitor_score
+18447285,2026-01-01,2025,Final,4,Final,False,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,96,11,Houston Rockets,HOU,Houston,West,Southwest,120
+18447286,2026-01-01,2025,Final,4,Final,False,9,Detroit Pistons,DET,Detroit,East,Central,112,16,Miami Heat,MIA,Miami,East,Southeast,118
+18447287,2026-01-01,2025,Final,4,Final,False,7,Dallas Mavericks,DAL,Dallas,West,Southwest,108,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,123
+18447288,2026-01-01,2025,Final,4,Final,False,26,Sacramento Kings,SAC,Sacramento,West,Pacific,106,2,Boston Celtics,BOS,Boston,East,Atlantic,120
+18447289,2026-01-01,2025,Final,4,Final,False,13,LA Clippers,LAC,LA,West,Pacific,118,29,Utah Jazz,UTA,Utah,West,Northwest,101
+18447290,2026-01-02,2025,Final,4,Final,False,12,Indiana Pacers,IND,Indiana,East,Central,113,27,San Antonio Spurs,SAS,San Antonio,West,Southwest,123
+18447291,2026-01-02,2025,Final,4,Final,False,30,Washington Wizards,WAS,Washington,East,Southeast,119,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,99
+18447292,2026-01-02,2025,Final,4,Final,False,6,Cleveland Cavaliers,CLE,Cleveland,East,Central,113,8,Denver Nuggets,DEN,Denver,West,Northwest,108
+18447293,2026-01-02,2025,Final,4,Final,False,20,New York Knicks,NYK,New York,East,Atlantic,99,1,Atlanta Hawks,ATL,Atlanta,East,Southeast,111
+18447294,2026-01-02,2025,Final,4,Final,False,5,Chicago Bulls,CHI,Chicago,East,Central,121,22,Orlando Magic,ORL,Orlando,East,Southeast,114
+18447295,2026-01-02,2025,Final,4,Final,False,17,Milwaukee Bucks,MIL,Milwaukee,East,Central,122,4,Charlotte Hornets,CHA,Charlotte,East,Southeast,121
+18447296,2026-01-02,2025,Final,4,Final,False,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,109,25,Portland Trail Blazers,POR,Portland,West,Northwest,122
+18447297,2026-01-02,2025,Final,4,Final,False,24,Phoenix Suns,PHX,Phoenix,West,Pacific,129,26,Sacramento Kings,SAC,Sacramento,West,Pacific,102
+18447298,2026-01-02,2025,Final,4,Final,False,10,Golden State Warriors,GSW,Golden State,West,Pacific,94,21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,131
+18447299,2026-01-02,2025,Final,4,Final,False,14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,128,15,Memphis Grizzlies,MEM,Memphis,West,Southwest,121
+18447300,2026-01-03,2025,Final,4,Final,False,16,Miami Heat,MIA,Miami,East,Southeast,115,18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,125
+18447301,2026-01-03,2025,Final,4,Final,False,20,New York Knicks,NYK,New York,East,Atlantic,119,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,130
+18447302,2026-01-03,2025,Final,4,Final,False,28,Toronto Raptors,TOR,Toronto,East,Atlantic,134,1,Atlanta Hawks,ATL,Atlanta,East,Southeast,117
+18447303,2026-01-03,2025,Final,4,Final,False,5,Chicago Bulls,CHI,Chicago,East,Central,99,4,Charlotte Hornets,CHA,Charlotte,East,Southeast,112
+18447304,2026-01-03,2025,Final,4,Final,False,27,San Antonio Spurs,SAS,San Antonio,West,Southwest,110,25,Portland Trail Blazers,POR,Portland,West,Northwest,115
+18447305,2026-01-03,2025,Final,4,Final,False,7,Dallas Mavericks,DAL,Dallas,West,Southwest,110,11,Houston Rockets,HOU,Houston,West,Southwest,104
+18447306,2026-01-03,2025,Final,4,Final,False,10,Golden State Warriors,GSW,Golden State,West,Pacific,123,29,Utah Jazz,UTA,Utah,West,Northwest,114
+18447307,2026-01-03,2025,Final,4,Final,False,13,LA Clippers,LAC,LA,West,Pacific,115,2,Boston Celtics,BOS,Boston,East,Atlantic,146
+18447308,2026-01-04,2025,Final,4,Final,False,6,Cleveland Cavaliers,CLE,Cleveland,East,Central,110,9,Detroit Pistons,DET,Detroit,East,Central,114
+18447309,2026-01-04,2025,Final,4,Final,False,22,Orlando Magic,ORL,Orlando,East,Southeast,135,12,Indiana Pacers,IND,Indiana,East,Central,127
+18447310,2026-01-04,2025,Final,4,Final,False,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,127,8,Denver Nuggets,DEN,Denver,West,Northwest,115
+18447311,2026-01-04,2025,Final,4,Final,False,16,Miami Heat,MIA,Miami,East,Southeast,125,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,106
+18447312,2026-01-04,2025,Final,4,Final,False,30,Washington Wizards,WAS,Washington,East,Southeast,115,18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,141
+18447313,2026-01-04,2025,Final,4,Final,False,24,Phoenix Suns,PHX,Phoenix,West,Pacific,108,21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,105
+18447314,2026-01-04,2025,Final,4,Final,False,26,Sacramento Kings,SAC,Sacramento,West,Pacific,98,17,Milwaukee Bucks,MIL,Milwaukee,East,Central,115
+18447315,2026-01-04,2025,Final,4,Final,False,14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,120,15,Memphis Grizzlies,MEM,Memphis,West,Southwest,114
+18447316,2026-01-05,2025,Final,4,Final,False,9,Detroit Pistons,DET,Detroit,East,Central,121,20,New York Knicks,NYK,New York,East,Atlantic,90
+18447317,2026-01-05,2025,Final,4,Final,False,2,Boston Celtics,BOS,Boston,East,Atlantic,115,5,Chicago Bulls,CHI,Chicago,East,Central,101
+18447318,2026-01-05,2025,Final,4,Final,False,28,Toronto Raptors,TOR,Toronto,East,Atlantic,118,1,Atlanta Hawks,ATL,Atlanta,East,Southeast,100
+18447319,2026-01-05,2025,Final,4,Final,False,11,Houston Rockets,HOU,Houston,West,Southwest,100,24,Phoenix Suns,PHX,Phoenix,West,Pacific,97
+18447320,2026-01-05,2025,Final,4,Final,False,21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,97,4,Charlotte Hornets,CHA,Charlotte,East,Southeast,124
+18447321,2026-01-05,2025,Final,5,Final,False,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,124,8,Denver Nuggets,DEN,Denver,West,Northwest,125
+18447322,2026-01-05,2025,Final,4,Final,False,13,LA Clippers,LAC,LA,West,Pacific,103,10,Golden State Warriors,GSW,Golden State,West,Pacific,102
+18447323,2026-01-05,2025,Final,4,Final,False,25,Portland Trail Blazers,POR,Portland,West,Northwest,137,29,Utah Jazz,UTA,Utah,West,Northwest,117
+18447324,2026-01-06,2025,Final,4,Final,False,12,Indiana Pacers,IND,Indiana,East,Central,116,6,Cleveland Cavaliers,CLE,Cleveland,East,Central,120
+18447325,2026-01-06,2025,Final,4,Final,False,30,Washington Wizards,WAS,Washington,East,Southeast,120,22,Orlando Magic,ORL,Orlando,East,Southeast,112
+18447326,2026-01-06,2025,Final,4,Final,False,15,Memphis Grizzlies,MEM,Memphis,West,Southwest,106,27,San Antonio Spurs,SAS,San Antonio,West,Southwest,105
+18447327,2026-01-06,2025,Final,4,Final,False,18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,122,16,Miami Heat,MIA,Miami,East,Southeast,94
+18447328,2026-01-06,2025,Final,4,Final,False,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,103,14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,111
+18447329,2026-01-06,2025,Final,4,Final,False,26,Sacramento Kings,SAC,Sacramento,West,Pacific,98,7,Dallas Mavericks,DAL,Dallas,West,Southwest,100
+18447330,2026-01-07,2025,Final,4,Final,False,4,Charlotte Hornets,CHA,Charlotte,East,Southeast,96,28,Toronto Raptors,TOR,Toronto,East,Atlantic,97
+18447331,2026-01-07,2025,Final,4,Final,False,9,Detroit Pistons,DET,Detroit,East,Central,108,5,Chicago Bulls,CHI,Chicago,East,Central,93
+18447332,2026-01-07,2025,Final,4,Final,False,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,131,30,Washington Wizards,WAS,Washington,East,Southeast,110
+18447333,2026-01-07,2025,Final,4,Final,False,1,Atlanta Hawks,ATL,Atlanta,East,Southeast,117,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,100
+18447334,2026-01-07,2025,Final,4,Final,False,2,Boston Celtics,BOS,Boston,East,Atlantic,110,8,Denver Nuggets,DEN,Denver,West,Northwest,114
+18447335,2026-01-07,2025,Final,5,Final,False,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,103,22,Orlando Magic,ORL,Orlando,East,Southeast,104
+18447336,2026-01-07,2025,Final,4,Final,False,20,New York Knicks,NYK,New York,East,Atlantic,123,13,LA Clippers,LAC,LA,West,Pacific,111
+18447337,2026-01-07,2025,Final,4,Final,False,27,San Antonio Spurs,SAS,San Antonio,West,Southwest,107,14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,91
+18447338,2026-01-07,2025,Final,4,Final,False,15,Memphis Grizzlies,MEM,Memphis,West,Southwest,98,24,Phoenix Suns,PHX,Phoenix,West,Pacific,117
+18447339,2026-01-07,2025,Final,5,Final,False,21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,129,29,Utah Jazz,UTA,Utah,West,Northwest,125
+18447340,2026-01-07,2025,Final,4,Final,False,10,Golden State Warriors,GSW,Golden State,West,Pacific,120,17,Milwaukee Bucks,MIL,Milwaukee,East,Central,113
+18447341,2026-01-07,2025,Final,4,Final,False,25,Portland Trail Blazers,POR,Portland,West,Northwest,103,11,Houston Rockets,HOU,Houston,West,Southwest,102
+18447342,2026-01-08,2025,Final,4,Final,False,4,Charlotte Hornets,CHA,Charlotte,East,Southeast,112,12,Indiana Pacers,IND,Indiana,East,Central,114
+18447344,2026-01-08,2025,Final,4,Final,False,18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,131,6,Cleveland Cavaliers,CLE,Cleveland,East,Central,122
+18447345,2026-01-08,2025,Final,4,Final,False,29,Utah Jazz,UTA,Utah,West,Northwest,116,7,Dallas Mavericks,DAL,Dallas,West,Southwest,114
+18447346,2026-01-09,2025,Final,4,Final,False,2,Boston Celtics,BOS,Boston,East,Atlantic,125,28,Toronto Raptors,TOR,Toronto,East,Atlantic,117
+18447347,2026-01-09,2025,Final,4,Final,False,22,Orlando Magic,ORL,Orlando,East,Southeast,91,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,103
+18447348,2026-01-09,2025,Final,4,Final,False,30,Washington Wizards,WAS,Washington,East,Southeast,107,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,128
+18447349,2026-01-09,2025,Final,4,Final,False,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,105,13,LA Clippers,LAC,LA,West,Pacific,121
+18447350,2026-01-09,2025,Final,4,Final,False,15,Memphis Grizzlies,MEM,Memphis,West,Southwest,116,21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,117
+18447351,2026-01-09,2025,Final,4,Final,False,8,Denver Nuggets,DEN,Denver,West,Northwest,87,1,Atlanta Hawks,ATL,Atlanta,East,Southeast,110
+18447352,2026-01-09,2025,Final,4,Final,False,24,Phoenix Suns,PHX,Phoenix,West,Pacific,112,20,New York Knicks,NYK,New York,East,Atlantic,107
+18447353,2026-01-09,2025,Final,4,Final,False,10,Golden State Warriors,GSW,Golden State,West,Pacific,137,26,Sacramento Kings,SAC,Sacramento,West,Pacific,103
+18447354,2026-01-09,2025,Final,4,Final,False,25,Portland Trail Blazers,POR,Portland,West,Northwest,111,11,Houston Rockets,HOU,Houston,West,Southwest,105
+18447355,2026-01-09,2025,Final,4,Final,False,14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,101,17,Milwaukee Bucks,MIL,Milwaukee,East,Central,105
+18447356,2026-01-10,2025,Final,4,Final,False,6,Cleveland Cavaliers,CLE,Cleveland,East,Central,146,18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,134
+18447357,2026-01-10,2025,Final,4,Final,False,12,Indiana Pacers,IND,Indiana,East,Central,123,16,Miami Heat,MIA,Miami,East,Southeast,99
+18447358,2026-01-10,2025,Final,4,Final,False,9,Detroit Pistons,DET,Detroit,East,Central,92,13,LA Clippers,LAC,LA,West,Pacific,98
+18447359,2026-01-10,2025,Final,4,Final,False,2,Boston Celtics,BOS,Boston,East,Atlantic,95,27,San Antonio Spurs,SAS,San Antonio,West,Southwest,100
+18447360,2026-01-10,2025,Final,4,Final,False,5,Chicago Bulls,CHI,Chicago,East,Central,125,7,Dallas Mavericks,DAL,Dallas,West,Southwest,107
+18447361,2026-01-10,2025,Final,4,Final,False,29,Utah Jazz,UTA,Utah,West,Northwest,95,4,Charlotte Hornets,CHA,Charlotte,East,Southeast,150
+18447362,2026-01-11,2025,Final,4,Final,False,22,Orlando Magic,ORL,Orlando,East,Southeast,128,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,118
+18447363,2026-01-11,2025,Final,4,Final,False,15,Memphis Grizzlies,MEM,Memphis,West,Southwest,103,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,98
+18447364,2026-01-11,2025,Final,5,Final,False,28,Toronto Raptors,TOR,Toronto,East,Atlantic,116,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,115
+18447365,2026-01-11,2025,Final,4,Final,False,25,Portland Trail Blazers,POR,Portland,West,Northwest,114,20,New York Knicks,NYK,New York,East,Atlantic,123
+18447366,2026-01-11,2025,Final,4,Final,False,18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,104,27,San Antonio Spurs,SAS,San Antonio,West,Southwest,103
+18447367,2026-01-11,2025,Final,4,Final,False,21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,124,16,Miami Heat,MIA,Miami,East,Southeast,112
+18447368,2026-01-11,2025,Final,4,Final,False,8,Denver Nuggets,DEN,Denver,West,Northwest,108,17,Milwaukee Bucks,MIL,Milwaukee,East,Central,104
+18447369,2026-01-11,2025,Final,4,Final,False,24,Phoenix Suns,PHX,Phoenix,West,Pacific,112,30,Washington Wizards,WAS,Washington,East,Southeast,93
+18447370,2026-01-11,2025,Final,4,Final,False,10,Golden State Warriors,GSW,Golden State,West,Pacific,111,1,Atlanta Hawks,ATL,Atlanta,East,Southeast,124
+18447371,2026-01-11,2025,Final,4,Final,False,26,Sacramento Kings,SAC,Sacramento,West,Pacific,111,11,Houston Rockets,HOU,Houston,West,Southwest,98
+18447372,2026-01-12,2025,Final,4,Final,False,6,Cleveland Cavaliers,CLE,Cleveland,East,Central,112,29,Utah Jazz,UTA,Utah,West,Northwest,123
+18447373,2026-01-12,2025,Final,4,Final,False,12,Indiana Pacers,IND,Indiana,East,Central,98,2,Boston Celtics,BOS,Boston,East,Atlantic,96
+18447374,2026-01-12,2025,Final,4,Final,False,28,Toronto Raptors,TOR,Toronto,East,Atlantic,102,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,115
+18447375,2026-01-12,2025,Final,4,Final,False,7,Dallas Mavericks,DAL,Dallas,West,Southwest,113,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,105
+18447376,2026-01-12,2025,Final,4,Final,False,26,Sacramento Kings,SAC,Sacramento,West,Pacific,124,14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,112
+18447377,2026-01-12,2025,Final,4,Final,False,13,LA Clippers,LAC,LA,West,Pacific,117,4,Charlotte Hornets,CHA,Charlotte,East,Southeast,109
+18447378,2026-01-13,2025,Final,4,Final,False,16,Miami Heat,MIA,Miami,East,Southeast,127,24,Phoenix Suns,PHX,Phoenix,West,Pacific,121
+18447379,2026-01-13,2025,Final,4,Final,False,11,Houston Rockets,HOU,Houston,West,Southwest,119,5,Chicago Bulls,CHI,Chicago,East,Central,113
+18447380,2026-01-13,2025,Final,4,Final,False,17,Milwaukee Bucks,MIL,Milwaukee,East,Central,106,18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,139
+18447381,2026-01-13,2025,Final,4,Final,False,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,116,8,Denver Nuggets,DEN,Denver,West,Northwest,122
+18447382,2026-01-13,2025,Final,4,Final,False,21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,119,27,San Antonio Spurs,SAS,San Antonio,West,Southwest,98
+18447383,2026-01-13,2025,Final,4,Final,False,14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,141,1,Atlanta Hawks,ATL,Atlanta,East,Southeast,116
+18447384,2026-01-13,2025,Final,4,Final,False,10,Golden State Warriors,GSW,Golden State,West,Pacific,119,25,Portland Trail Blazers,POR,Portland,West,Northwest,97
+18447385,2026-01-14,2025,Final,4,Final,False,12,Indiana Pacers,IND,Indiana,East,Central,101,28,Toronto Raptors,TOR,Toronto,East,Atlantic,115
+18447386,2026-01-14,2025,Final,4,Final,False,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,107,6,Cleveland Cavaliers,CLE,Cleveland,East,Central,133
+18447387,2026-01-14,2025,Final,4,Final,False,5,Chicago Bulls,CHI,Chicago,East,Central,128,29,Utah Jazz,UTA,Utah,West,Northwest,126
+18447388,2026-01-14,2025,Final,4,Final,False,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,116,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,113
+18447389,2026-01-14,2025,Final,4,Final,False,7,Dallas Mavericks,DAL,Dallas,West,Southwest,109,8,Denver Nuggets,DEN,Denver,West,Northwest,118
+18447390,2026-01-14,2025,Final,4,Final,False,26,Sacramento Kings,SAC,Sacramento,West,Pacific,112,20,New York Knicks,NYK,New York,East,Atlantic,101
+18447391,2026-01-14,2025,Final,4,Final,False,13,LA Clippers,LAC,LA,West,Pacific,119,30,Washington Wizards,WAS,Washington,East,Southeast,105
+18447392,2026-01-15,2025,Final,4,Final,False,22,Orlando Magic,ORL,Orlando,East,Southeast,118,15,Memphis Grizzlies,MEM,Memphis,West,Southwest,111
+18447393,2026-01-15,2025,Final,4,Final,False,9,Detroit Pistons,DET,Detroit,East,Central,108,24,Phoenix Suns,PHX,Phoenix,West,Pacific,105
+18447394,2026-01-15,2025,Final,4,Final,False,16,Miami Heat,MIA,Miami,East,Southeast,114,2,Boston Celtics,BOS,Boston,East,Atlantic,119
+18447395,2026-01-15,2025,Final,4,Final,False,11,Houston Rockets,HOU,Houston,West,Southwest,91,21,Oklahoma City Thunder,OKC,Oklahoma City,West,Northwest,111
+18447396,2026-01-15,2025,Final,4,Final,False,27,San Antonio Spurs,SAS,San Antonio,West,Southwest,119,17,Milwaukee Bucks,MIL,Milwaukee,East,Central,101
+18447397,2026-01-15,2025,Final,4,Final,False,7,Dallas Mavericks,DAL,Dallas,West,Southwest,144,29,Utah Jazz,UTA,Utah,West,Northwest,122
+18447398,2026-01-15,2025,Final,4,Final,False,10,Golden State Warriors,GSW,Golden State,West,Pacific,126,20,New York Knicks,NYK,New York,East,Atlantic,113
+18447399,2026-01-15,2025,Final,4,Final,False,25,Portland Trail Blazers,POR,Portland,West,Northwest,117,1,Atlanta Hawks,ATL,Atlanta,East,Southeast,101
+18447400,2026-01-15,2025,Final,4,Final,False,14,Los Angeles Lakers,LAL,Los Angeles,West,Pacific,117,4,Charlotte Hornets,CHA,Charlotte,East,Southeast,135
+18447401,2026-01-16,2025,Final,4,Final,False,3,Brooklyn Nets,BKN,Brooklyn,East,Atlantic,112,5,Chicago Bulls,CHI,Chicago,East,Central,109
+18447402,2026-01-16,2025,Final,4,Final,False,12,Indiana Pacers,IND,Indiana,East,Central,127,19,New Orleans Pelicans,NOP,New Orleans,West,Southwest,119
+18447403,2026-01-16,2025,Final,4,Final,False,23,Philadelphia 76ers,PHI,Philadelphia,East,Atlantic,115,6,Cleveland Cavaliers,CLE,Cleveland,East,Central,117
+18447404,2026-01-16,2025,Final,5,Final,False,28,Toronto Raptors,TOR,Toronto,East,Atlantic,117,13,LA Clippers,LAC,LA,West,Pacific,121
+18447405,2026-01-16,2025,Final,4,Final,False,11,Houston Rockets,HOU,Houston,West,Southwest,110,18,Minnesota Timberwolves,MIN,Minnesota,West,Northwest,105
+18447406,2026-01-16,2025,Final,4,Final,False,26,Sacramento Kings,SAC,Sacramento,West,Pacific,128,30,Washington Wizards,WAS,Washington,East,Southeast,115

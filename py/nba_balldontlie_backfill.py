@@ -52,9 +52,6 @@ BASE_URL = "https://api.balldontlie.io/v1"
 OUTPUT_DIR = "data"
 RATE_LIMIT_DELAY = 0.1  # 100ms between requests (600/min = 10/sec, conservative)
 
-# Ensure output directory exists
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
 
 class BallDontLieClient:
     """API client for BallDontLie GOAT tier endpoints."""
@@ -209,16 +206,7 @@ class BallDontLieClient:
 # ==============================
 
 def flatten_game(game: Dict) -> Dict:
-    """
-    Flatten a game record - extract all fields from nested team objects.
-    
-    Output columns:
-    - game_id, date, season, status, period, time, postseason
-    - home_team_id, home_team_name, home_team_abbr, home_team_city, 
-      home_team_conference, home_team_division, home_score
-    - visitor_team_id, visitor_team_name, visitor_team_abbr, visitor_team_city,
-      visitor_team_conference, visitor_team_division, visitor_score
-    """
+    """Flatten a game record - extract all fields from nested team objects."""
     home = game.get("home_team", {}) or {}
     visitor = game.get("visitor_team", {}) or {}
     
@@ -253,19 +241,7 @@ def flatten_game(game: Dict) -> Dict:
 
 
 def flatten_player_stat(stat: Dict) -> Dict:
-    """
-    Flatten a player stat record - extract all fields from nested objects.
-    
-    Output columns:
-    - stat_id
-    - Player: player_id, player_first_name, player_last_name, player_name, 
-              player_position, player_height, player_weight, player_jersey,
-              player_college, player_country, player_draft_year, player_draft_round, player_draft_number
-    - Team: team_id, team_abbr, team_name, team_city, team_conference, team_division
-    - Game: game_id, game_date
-    - Stats: min, pts, reb, oreb, dreb, ast, stl, blk, turnover, pf,
-             fgm, fga, fg_pct, fg3m, fg3a, fg3_pct, ftm, fta, ft_pct
-    """
+    """Flatten a player stat record - extract all fields from nested objects."""
     player = stat.get("player", {}) or {}
     team = stat.get("team", {}) or {}
     game = stat.get("game", {}) or {}
@@ -320,24 +296,12 @@ def flatten_player_stat(stat: Dict) -> Dict:
         "ftm": stat.get("ftm"),
         "fta": stat.get("fta"),
         "ft_pct": stat.get("ft_pct"),
-        "plus_minus": stat.get("plus_minus"),  # May not always be present
+        "plus_minus": stat.get("plus_minus"),
     }
 
 
 def flatten_advanced_stat(stat: Dict) -> Dict:
-    """
-    Flatten an advanced stat record - extract all fields from nested objects.
-    
-    Output columns:
-    - stat_id
-    - Player: player_id, player_first_name, player_last_name, player_name, player_position
-    - Team: team_id, team_abbr, team_name
-    - Game: game_id, game_date
-    - Advanced stats: pie, pace, assist_percentage, assist_ratio, assist_to_turnover,
-                      defensive_rating, defensive_rebound_percentage, effective_field_goal_percentage,
-                      net_rating, offensive_rating, offensive_rebound_percentage, rebound_percentage,
-                      true_shooting_percentage, turnover_ratio, usage_percentage
-    """
+    """Flatten an advanced stat record - extract all fields from nested objects."""
     player = stat.get("player", {}) or {}
     team = stat.get("team", {}) or {}
     game = stat.get("game", {}) or {}
@@ -381,27 +345,17 @@ def flatten_advanced_stat(stat: Dict) -> Dict:
 
 
 def flatten_standing(standing: Dict) -> Dict:
-    """
-    Flatten a standing record - extract all fields from nested team object.
-    
-    Output columns:
-    - Team: team_id, team_name, team_abbr, team_city, team_conference, team_division
-    - Standings: wins, losses, win_pct, conference_rank, conference_record,
-                 division_rank, division_record, home_record, road_record, season
-    """
+    """Flatten a standing record - extract all fields from nested team object."""
     team = standing.get("team", {}) or {}
     
-    # Calculate win percentage
     wins = standing.get("wins", 0) or 0
     losses = standing.get("losses", 0) or 0
     win_pct = wins / (wins + losses) if (wins + losses) > 0 else 0.0
     
-    # Parse home/road records to get wins/losses
     home_record = standing.get("home_record", "0-0")
     road_record = standing.get("road_record", "0-0")
     
     def parse_record(record_str):
-        """Parse '15-6' into (15, 6) tuple."""
         try:
             if not record_str or record_str == "0-0":
                 return 0, 0
@@ -414,15 +368,12 @@ def flatten_standing(standing: Dict) -> Dict:
     road_wins, road_losses = parse_record(road_record)
     
     return {
-        # Team info (flattened)
         "team_id": team.get("id"),
         "team_name": team.get("full_name"),
         "team_abbr": team.get("abbreviation"),
         "team_city": team.get("city"),
         "team_conference": team.get("conference"),
         "team_division": team.get("division"),
-        
-        # Standings
         "wins": wins,
         "losses": losses,
         "win_pct": round(win_pct, 3),
@@ -441,20 +392,10 @@ def flatten_standing(standing: Dict) -> Dict:
 
 
 def flatten_leader(leader: Dict) -> Dict:
-    """
-    Flatten a leader record - extract all fields from nested player object.
-    
-    Output columns:
-    - Player: player_id, player_first_name, player_last_name, player_name,
-              player_position, player_height, player_weight, player_jersey,
-              player_college, player_country, player_team_id,
-              player_draft_year, player_draft_round, player_draft_number
-    - Leader stats: stat_type, value, games_played, rank, season
-    """
+    """Flatten a leader record - extract all fields from nested player object."""
     player = leader.get("player", {}) or {}
     
     return {
-        # Player info (flattened)
         "player_id": player.get("id"),
         "player_first_name": player.get("first_name"),
         "player_last_name": player.get("last_name"),
@@ -469,8 +410,6 @@ def flatten_leader(leader: Dict) -> Dict:
         "player_draft_year": player.get("draft_year"),
         "player_draft_round": player.get("draft_round"),
         "player_draft_number": player.get("draft_number"),
-        
-        # Leader stats
         "stat_type": leader.get("stat_type"),
         "value": leader.get("value"),
         "games_played": leader.get("games_played"),
@@ -480,18 +419,10 @@ def flatten_leader(leader: Dict) -> Dict:
 
 
 def flatten_player(player: Dict) -> Dict:
-    """
-    Flatten a player record - extract all fields from nested team object.
-    
-    Output columns:
-    - Player: player_id, first_name, last_name, full_name, position, height, weight,
-              jersey_number, college, country, draft_year, draft_round, draft_number
-    - Team: team_id, team_name, team_abbr, team_city, team_conference, team_division
-    """
+    """Flatten a player record - extract all fields from nested team object."""
     team = player.get("team", {}) or {}
     
     return {
-        # Player info
         "player_id": player.get("id"),
         "first_name": player.get("first_name"),
         "last_name": player.get("last_name"),
@@ -505,8 +436,6 @@ def flatten_player(player: Dict) -> Dict:
         "draft_year": player.get("draft_year"),
         "draft_round": player.get("draft_round"),
         "draft_number": player.get("draft_number"),
-        
-        # Team info (flattened)
         "team_id": team.get("id"),
         "team_name": team.get("full_name"),
         "team_abbr": team.get("abbreviation"),
@@ -517,12 +446,7 @@ def flatten_player(player: Dict) -> Dict:
 
 
 def flatten_team(team: Dict) -> Dict:
-    """
-    Teams are already flat - just standardize column names.
-    
-    Output columns:
-    - team_id, name, full_name, abbreviation, city, conference, division
-    """
+    """Teams are already flat - just standardize column names."""
     return {
         "team_id": team.get("id"),
         "name": team.get("name"),
@@ -538,11 +462,13 @@ def flatten_team(team: Dict) -> Dict:
 # SAVE AND BACKFILL FUNCTIONS
 # ==============================
 
-def save_dataframe(df: pd.DataFrame, filename: str, output_dir: str = OUTPUT_DIR):
+def save_dataframe(df: pd.DataFrame, filename: str, output_dir: str):
     """Save DataFrame to both CSV and Parquet formats."""
     if df.empty:
         print(f"  ⚠️  No data to save for {filename}")
         return
+    
+    os.makedirs(output_dir, exist_ok=True)
     
     csv_path = os.path.join(output_dir, f"{filename}.csv")
     parquet_path = os.path.join(output_dir, f"{filename}.parquet")
@@ -554,7 +480,7 @@ def save_dataframe(df: pd.DataFrame, filename: str, output_dir: str = OUTPUT_DIR
 
 
 def backfill_games(client: BallDontLieClient, start_date: str, end_date: str, 
-                   season: int = None) -> pd.DataFrame:
+                   season: int, output_dir: str) -> pd.DataFrame:
     """Backfill games data."""
     print(f"\n📅 GAMES: {start_date} to {end_date}")
     
@@ -566,12 +492,12 @@ def backfill_games(client: BallDontLieClient, start_date: str, end_date: str,
     
     print(f"  Found {len(games)} games, flattening...")
     df = pd.DataFrame([flatten_game(g) for g in games])
-    save_dataframe(df, f"games_{start_date}_{end_date}")
+    save_dataframe(df, f"games_{start_date}_{end_date}", output_dir)
     
     return df
 
 
-def backfill_player_stats(client: BallDontLieClient, game_ids: List[int] = None,
+def backfill_player_stats(client: BallDontLieClient, output_dir: str, game_ids: List[int] = None,
                           start_date: str = None, end_date: str = None,
                           season: int = None) -> pd.DataFrame:
     """Backfill player stats data."""
@@ -587,12 +513,12 @@ def backfill_player_stats(client: BallDontLieClient, game_ids: List[int] = None,
     df = pd.DataFrame([flatten_player_stat(s) for s in stats])
     
     filename = f"player_stats_{start_date}_{end_date}" if start_date else "player_stats"
-    save_dataframe(df, filename)
+    save_dataframe(df, filename, output_dir)
     
     return df
 
 
-def backfill_advanced_stats(client: BallDontLieClient, game_ids: List[int] = None,
+def backfill_advanced_stats(client: BallDontLieClient, output_dir: str, game_ids: List[int] = None,
                             start_date: str = None, end_date: str = None,
                             season: int = None) -> pd.DataFrame:
     """Backfill advanced stats data."""
@@ -608,12 +534,12 @@ def backfill_advanced_stats(client: BallDontLieClient, game_ids: List[int] = Non
     df = pd.DataFrame([flatten_advanced_stat(s) for s in stats])
     
     filename = f"advanced_stats_{start_date}_{end_date}" if start_date else "advanced_stats"
-    save_dataframe(df, filename)
+    save_dataframe(df, filename, output_dir)
     
     return df
 
 
-def backfill_standings(client: BallDontLieClient, season: int) -> pd.DataFrame:
+def backfill_standings(client: BallDontLieClient, season: int, output_dir: str) -> pd.DataFrame:
     """Backfill standings data."""
     print(f"\n🏆 STANDINGS: Season {season}")
     
@@ -625,16 +551,14 @@ def backfill_standings(client: BallDontLieClient, season: int) -> pd.DataFrame:
     
     print(f"  Found {len(standings)} team standings, flattening...")
     df = pd.DataFrame([flatten_standing(s) for s in standings])
-    
-    # Sort by conference and wins
     df = df.sort_values(["team_conference", "wins"], ascending=[True, False])
     
-    save_dataframe(df, f"standings_{season}")
+    save_dataframe(df, f"standings_{season}", output_dir)
     
     return df
 
 
-def backfill_leaders(client: BallDontLieClient, season: int) -> pd.DataFrame:
+def backfill_leaders(client: BallDontLieClient, season: int, output_dir: str) -> pd.DataFrame:
     """Backfill league leaders data for all stat categories."""
     print(f"\n🌟 LEAGUE LEADERS: Season {season}")
     
@@ -654,12 +578,12 @@ def backfill_leaders(client: BallDontLieClient, season: int) -> pd.DataFrame:
     
     print(f"  Found {len(all_leaders):,} leader records, flattening...")
     df = pd.DataFrame([flatten_leader(l) for l in all_leaders])
-    save_dataframe(df, f"leaders_{season}")
+    save_dataframe(df, f"leaders_{season}", output_dir)
     
     return df
 
 
-def backfill_teams(client: BallDontLieClient) -> pd.DataFrame:
+def backfill_teams(client: BallDontLieClient, output_dir: str) -> pd.DataFrame:
     """Backfill teams reference data."""
     print(f"\n🏀 TEAMS")
     
@@ -672,18 +596,17 @@ def backfill_teams(client: BallDontLieClient) -> pd.DataFrame:
     print(f"  Found {len(teams)} teams, flattening...")
     df = pd.DataFrame([flatten_team(t) for t in teams])
     
-    # Filter to current NBA teams (id 1-30)
     df_current = df[df["team_id"] <= 30].copy()
     df_historical = df[df["team_id"] > 30].copy()
     
-    save_dataframe(df_current, "teams")
+    save_dataframe(df_current, "teams", output_dir)
     if not df_historical.empty:
-        save_dataframe(df_historical, "teams_historical")
+        save_dataframe(df_historical, "teams_historical", output_dir)
     
     return df
 
 
-def backfill_players(client: BallDontLieClient) -> pd.DataFrame:
+def backfill_players(client: BallDontLieClient, output_dir: str) -> pd.DataFrame:
     """Backfill players reference data."""
     print(f"\n👤 PLAYERS")
     
@@ -695,7 +618,7 @@ def backfill_players(client: BallDontLieClient) -> pd.DataFrame:
     
     print(f"  Found {len(players):,} players, flattening...")
     df = pd.DataFrame([flatten_player(p) for p in players])
-    save_dataframe(df, "players")
+    save_dataframe(df, "players", output_dir)
     
     return df
 
@@ -704,7 +627,8 @@ def backfill_players(client: BallDontLieClient) -> pd.DataFrame:
 # MAIN BACKFILL MODES
 # ==============================
 
-def run_full_backfill(client: BallDontLieClient, start_date: str, end_date: str, season: int):
+def run_full_backfill(client: BallDontLieClient, start_date: str, end_date: str, 
+                      season: int, output_dir: str):
     """Run complete backfill of all data types."""
     print("=" * 70)
     print(f"🚀 FULL BACKFILL: {start_date} to {end_date} (Season {season})")
@@ -713,38 +637,42 @@ def run_full_backfill(client: BallDontLieClient, start_date: str, end_date: str,
     start_time = time.time()
     
     # 1. Games (needed for game_ids)
-    games_df = backfill_games(client, start_date, end_date, season)
+    games_df = backfill_games(client, start_date, end_date, season, output_dir)
     
     if not games_df.empty:
         game_ids = games_df["game_id"].tolist()
         
         # 2. Player Stats
-        backfill_player_stats(client, game_ids=game_ids, start_date=start_date, end_date=end_date)
+        backfill_player_stats(client, output_dir, game_ids=game_ids, 
+                              start_date=start_date, end_date=end_date)
         
         # 3. Advanced Stats
-        backfill_advanced_stats(client, game_ids=game_ids, start_date=start_date, end_date=end_date)
+        backfill_advanced_stats(client, output_dir, game_ids=game_ids, 
+                                start_date=start_date, end_date=end_date)
     
     # 4. Standings
-    backfill_standings(client, season)
+    backfill_standings(client, season, output_dir)
     
     # 5. Leaders
-    backfill_leaders(client, season)
+    backfill_leaders(client, season, output_dir)
     
     # 6. Teams (reference data)
-    backfill_teams(client)
+    backfill_teams(client, output_dir)
     
     # 7. Players (reference data)
-    backfill_players(client)
+    backfill_players(client, output_dir)
     
     elapsed = time.time() - start_time
     print("\n" + "=" * 70)
     print(f"✅ FULL BACKFILL COMPLETE")
     print(f"   Time elapsed: {elapsed:.1f} seconds ({elapsed/60:.1f} minutes)")
     print(f"   API requests: {client.request_count:,}")
+    print(f"   Output: {output_dir}/")
     print("=" * 70)
 
 
-def run_daily_backfill(client: BallDontLieClient, start_date: str, end_date: str, season: int):
+def run_daily_backfill(client: BallDontLieClient, start_date: str, end_date: str, 
+                       season: int, output_dir: str):
     """Run daily backfill (games, player stats, advanced stats, standings)."""
     print("=" * 70)
     print(f"📅 DAILY BACKFILL: {start_date} to {end_date}")
@@ -753,25 +681,28 @@ def run_daily_backfill(client: BallDontLieClient, start_date: str, end_date: str
     start_time = time.time()
     
     # 1. Games
-    games_df = backfill_games(client, start_date, end_date, season)
+    games_df = backfill_games(client, start_date, end_date, season, output_dir)
     
     if not games_df.empty:
         game_ids = games_df["game_id"].tolist()
         
         # 2. Player Stats
-        backfill_player_stats(client, game_ids=game_ids, start_date=start_date, end_date=end_date)
+        backfill_player_stats(client, output_dir, game_ids=game_ids, 
+                              start_date=start_date, end_date=end_date)
         
         # 3. Advanced Stats
-        backfill_advanced_stats(client, game_ids=game_ids, start_date=start_date, end_date=end_date)
+        backfill_advanced_stats(client, output_dir, game_ids=game_ids, 
+                                start_date=start_date, end_date=end_date)
     
     # 4. Standings (always current)
-    backfill_standings(client, season)
+    backfill_standings(client, season, output_dir)
     
     elapsed = time.time() - start_time
     print("\n" + "=" * 70)
     print(f"✅ DAILY BACKFILL COMPLETE")
     print(f"   Time elapsed: {elapsed:.1f} seconds")
     print(f"   API requests: {client.request_count:,}")
+    print(f"   Output: {output_dir}/")
     print("=" * 70)
 
 
@@ -811,7 +742,7 @@ Examples:
     parser.add_argument("--players", action="store_true", help="Backfill players")
     
     # Output
-    parser.add_argument("--output", type=str, default=OUTPUT_DIR, help="Output directory (default: data)")
+    parser.add_argument("--output", type=str, default="data", help="Output directory (default: data)")
     
     args = parser.parse_args()
     
@@ -825,9 +756,8 @@ Examples:
     client = BallDontLieClient(API_KEY)
     
     # Set output directory
-    global OUTPUT_DIR
-    OUTPUT_DIR = args.output
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    output_dir = args.output
+    os.makedirs(output_dir, exist_ok=True)
     
     # Default dates
     today = datetime.now().strftime("%Y-%m-%d")
@@ -836,37 +766,37 @@ Examples:
     
     # Run appropriate backfill
     if args.full:
-        run_full_backfill(client, start_date, end_date, args.season)
+        run_full_backfill(client, start_date, end_date, args.season, output_dir)
     elif args.daily:
-        run_daily_backfill(client, start_date, end_date, args.season)
+        run_daily_backfill(client, start_date, end_date, args.season, output_dir)
     else:
         # Individual data types
         game_ids = None
         
         if args.games:
-            games_df = backfill_games(client, start_date, end_date, args.season)
+            games_df = backfill_games(client, start_date, end_date, args.season, output_dir)
             if not games_df.empty:
                 game_ids = games_df["game_id"].tolist()
         
         if args.player_stats:
-            backfill_player_stats(client, game_ids=game_ids, start_date=start_date, 
-                                  end_date=end_date, season=args.season)
+            backfill_player_stats(client, output_dir, game_ids=game_ids, 
+                                  start_date=start_date, end_date=end_date, season=args.season)
         
         if args.advanced_stats:
-            backfill_advanced_stats(client, game_ids=game_ids, start_date=start_date,
-                                    end_date=end_date, season=args.season)
+            backfill_advanced_stats(client, output_dir, game_ids=game_ids,
+                                    start_date=start_date, end_date=end_date, season=args.season)
         
         if args.standings:
-            backfill_standings(client, args.season)
+            backfill_standings(client, args.season, output_dir)
         
         if args.leaders:
-            backfill_leaders(client, args.season)
+            backfill_leaders(client, args.season, output_dir)
         
         if args.teams:
-            backfill_teams(client)
+            backfill_teams(client, output_dir)
         
         if args.players:
-            backfill_players(client)
+            backfill_players(client, output_dir)
         
         # If no flags, show help
         if not any([args.games, args.player_stats, args.advanced_stats, 
