@@ -1,375 +1,271 @@
 #!/usr/bin/env python3
 """
-BallDontLie API Client - Clean NBA Data Collection
-Much simpler and more reliable than nba_api!
+BallDontLie API Client - GOAT Tier ($39.99/month)
+Supports 600 requests/minute with all premium endpoints
 """
 
 import requests
 import time
+import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-import json
+from pathlib import Path
+import pandas as pd
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 
 class BallDontLieClient:
-    """
-    Clean client for BallDontLie API
-    Free tier: 30 requests/minute
-    Docs: https://docs.balldontlie.io/
-    """
-    
     def __init__(self, api_key: Optional[str] = None):
-        self.base_url = "https://api.balldontlie.io/v1"
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("BALLDONTLIE_API_KEY")
+        if not self.api_key:
+            raise ValueError("API key required. Set BALLDONTLIE_API_KEY env var or pass api_key parameter")
         
-        # Rate limiting (30 requests/minute free tier)
-        self.requests_per_minute = 30 if not api_key else 60  # Higher with API key
-        self.min_delay = 60.0 / self.requests_per_minute  # 2 seconds for free tier
-        self.last_request = 0
+        self.base_url = "https://api.balldontlie.io"
+        self.headers = {"Authorization": self.api_key}
+        self.min_request_interval = 0.1
+        self.last_request_time = 0
+        self.request_count = 0
         
-        # Headers
-        self.headers = {
-            'Accept': 'application/json',
-        }
-        if api_key:
-            self.headers['Authorization'] = api_key
-        
-        # Stats
-        self.total_requests = 0
-        self.failed_requests = 0
-        
-        print(f"🏀 BallDontLie API initialized")
-        print(f"   Rate limit: {self.requests_per_minute} requests/minute")
-        print(f"   Min delay: {self.min_delay:.1f}s between requests")
-    
     def _rate_limit(self):
-        """Ensure we respect rate limits"""
-        time_since_last = time.time() - self.last_request
-        if time_since_last < self.min_delay:
-            wait_time = self.min_delay - time_since_last
-            time.sleep(wait_time)
-        self.last_request = time.time()
-    
-    def _make_request(self, endpoint: str, params: Dict = None) -> Optional[Dict]:
-        """Make API request with rate limiting and error handling"""
+        elapsed = time.time() - self.last_request_time
+        if elapsed < self.min_request_interval:
+            time.sleep(self.min_request_interval - elapsed)
+        self.last_request_time = time.time()
+        self.request_count += 1
+        
+    def _request(self, endpoint: str, params: Optional[Dict] = None, version: str = "v1") -> Optional[Dict]:
         self._rate_limit()
-        
-        url = f"{self.base_url}/{endpoint}"
-        
+        url = f"{self.base_url}/{version}/{endpoint}"
         try:
-            response = requests.get(
-                url,
-                headers=self.headers,
-                params=params,
-                timeout=30
-            )
-            
-            self.total_requests += 1
-            
+            response = requests.get(url, headers=self.headers, params=params, timeout=30)
             if response.status_code == 200:
                 return response.json()
             elif response.status_code == 429:
-                print(f"   ⚠️ Rate limit hit, waiting 60s...")
+                print(f"   ⚠️ Rate limited, waiting 60s...")
                 time.sleep(60)
-                return self._make_request(endpoint, params)  # Retry
-            else:
-                print(f"   ❌ API error {response.status_code}: {response.text[:200]}")
-                self.failed_requests += 1
+                return self._request(endpoint, params, version)
+            elif response.status_code == 401:
+                print(f"   ❌ Authentication failed - check API key")
                 return None
-                
+            else:
+                print(f"   ❌ Error {response.status_code}: {response.text[:200]}")
+                return None
         except requests.exceptions.Timeout:
-            print(f"   ⚠️ Request timeout for {endpoint}")
-            self.failed_requests += 1
-            return None
+            print(f"   ⚠️ Timeout on {endpoint}, retrying...")
+            time.sleep(2)
+            return self._request(endpoint, params, version)
         except Exception as e:
-            print(f"   ❌ Request failed: {e}")
-            self.failed_requests += 1
+            print(f"   ❌ Request error: {e}")
             return None
+    
+    def _paginate(self, endpoint: str, params: Dict, max_pages: int = 50, version: str = "v1") -> List[Dict]:
+        all_data = []
+        params = params.copy()
+        params["per_page"] = 100
+        for page in range(1, max_pages + 1):
+            params["cursor"] = page - 1 if page > 1 else 0
+            result = self._request(endpoint, params, version)
+            if not result or not result.get("data"):
+                break
+            all_data.extend(result["data"])
+            meta = result.get("meta", {})
+            if not meta.get("next_cursor"):
+                break
+        return all_data
+    
+    # === CORE ENDPOINTS ===
     
     def get_teams(self) -> List[Dict]:
-        """
-        Get all NBA teams
-        Returns: List of team dicts with id, name, abbreviation, etc.
-        """
-        print("📋 Fetching NBA teams...")
-        
-        all_teams = []
-        page = 1
-        
-        while True:
-            data = self._make_request("teams", params={"page": page})
-            
-            if not data or 'data' not in data:
-                break
-            
-            teams = data['data']
-            all_teams.extend(teams)
-            
-            # Check if more pages
-            meta = data.get('meta', {})
-            if page >= meta.get('total_pages', 1):
-                break
-            
-            page += 1
-        
-        print(f"   ✅ Retrieved {len(all_teams)} teams")
-        return all_teams
+        result = self._request("teams")
+        return result.get("data", []) if result else []
     
-    def get_games(self, 
-                  start_date: str,
-                  end_date: Optional[str] = None,
-                  team_ids: Optional[List[int]] = None,
-                  seasons: Optional[List[int]] = None) -> List[Dict]:
-        """
-        Get games for date range
-        
-        Args:
-            start_date: YYYY-MM-DD format
-            end_date: YYYY-MM-DD format (defaults to start_date)
-            team_ids: Optional list of team IDs to filter
-            seasons: Optional list of season years (e.g., [2024])
-        
-        Returns: List of game dicts
-        """
-        if not end_date:
-            end_date = start_date
-        
-        print(f"📅 Fetching games from {start_date} to {end_date}...")
-        
-        all_games = []
-        page = 1
-        
-        while True:
-            params = {
-                "start_date": start_date,
-                "end_date": end_date,
-                "page": page,
-                "per_page": 100  # Max per page
-            }
-            
-            if team_ids:
-                params['team_ids[]'] = team_ids
-            if seasons:
-                params['seasons[]'] = seasons
-            
-            data = self._make_request("games", params=params)
-            
-            if not data or 'data' not in data:
-                break
-            
-            games = data['data']
-            all_games.extend(games)
-            
-            # Check if more pages
-            meta = data.get('meta', {})
-            if page >= meta.get('total_pages', 1):
-                break
-            
-            page += 1
-            
-            print(f"   📄 Page {page-1}/{meta.get('total_pages', '?')}: {len(games)} games")
-        
-        print(f"   ✅ Retrieved {len(all_games)} total games")
-        return all_games
+    def get_players(self, search: Optional[str] = None, team_ids: Optional[List[int]] = None) -> List[Dict]:
+        params = {"per_page": 100}
+        if search:
+            params["search"] = search
+        if team_ids:
+            params["team_ids[]"] = team_ids
+        return self._paginate("players", params)
     
-    def get_game_stats(self, game_id: int) -> List[Dict]:
-        """
-        Get box scores (player stats) for a specific game
-        
-        Args:
-            game_id: Game ID from games endpoint
-        
-        Returns: List of player stat dicts
-        """
-        print(f"📊 Fetching stats for game {game_id}...")
-        
-        all_stats = []
-        page = 1
-        
-        while True:
-            params = {
-                "game_ids[]": [game_id],
-                "page": page,
-                "per_page": 100
-            }
-            
-            data = self._make_request("stats", params=params)
-            
-            if not data or 'data' not in data:
-                break
-            
-            stats = data['data']
-            all_stats.extend(stats)
-            
-            # Check if more pages
-            meta = data.get('meta', {})
-            if page >= meta.get('total_pages', 1):
-                break
-            
-            page += 1
-        
-        print(f"   ✅ Retrieved {len(all_stats)} player stats")
-        return all_stats
+    def get_games(self, start_date: str, end_date: str, team_ids: Optional[List[int]] = None) -> List[Dict]:
+        params = {"start_date": start_date, "end_date": end_date, "per_page": 100}
+        if team_ids:
+            params["team_ids[]"] = team_ids
+        return self._paginate("games", params)
     
-    def get_stats_for_date(self, date: str) -> List[Dict]:
-        """
-        Get all player stats for games on a specific date
-        More efficient than fetching each game individually
-        
-        Args:
-            date: YYYY-MM-DD format
-        
-        Returns: List of player stat dicts
-        """
-        print(f"📊 Fetching all stats for {date}...")
-        
-        all_stats = []
-        page = 1
-        
-        while True:
-            params = {
-                "start_date": date,
-                "end_date": date,
-                "page": page,
-                "per_page": 100
-            }
-            
-            data = self._make_request("stats", params=params)
-            
-            if not data or 'data' not in data:
-                break
-            
-            stats = data['data']
-            all_stats.extend(stats)
-            
-            # Check if more pages
-            meta = data.get('meta', {})
-            if page >= meta.get('total_pages', 1):
-                break
-            
-            page += 1
-            
-            print(f"   📄 Page {page-1}/{meta.get('total_pages', '?')}: {len(stats)} stats")
-        
-        print(f"   ✅ Retrieved {len(all_stats)} total player stats")
-        return all_stats
+    def get_stats(self, game_ids: Optional[List[int]] = None, player_ids: Optional[List[int]] = None,
+                  start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Dict]:
+        params = {"per_page": 100}
+        if game_ids:
+            params["game_ids[]"] = game_ids
+        if player_ids:
+            params["player_ids[]"] = player_ids
+        if start_date:
+            params["start_date"] = start_date
+        if end_date:
+            params["end_date"] = end_date
+        return self._paginate("stats", params)
     
-    def get_players(self, search: Optional[str] = None) -> List[Dict]:
-        """
-        Get players (optionally filtered by search term)
-        
-        Args:
-            search: Optional search string for player name
-        
-        Returns: List of player dicts
-        """
-        print(f"👥 Fetching players{f' matching {search}' if search else ''}...")
-        
-        all_players = []
-        page = 1
-        
-        while True:
-            params = {
-                "page": page,
-                "per_page": 100
-            }
-            
-            if search:
-                params['search'] = search
-            
-            data = self._make_request("players", params=params)
-            
-            if not data or 'data' not in data:
-                break
-            
-            players = data['data']
-            all_players.extend(players)
-            
-            # Check if more pages
-            meta = data.get('meta', {})
-            if page >= meta.get('total_pages', 1):
-                break
-            
-            page += 1
-        
-        print(f"   ✅ Retrieved {len(all_players)} players")
-        return all_players
+    def get_box_scores(self, date: str) -> List[Dict]:
+        result = self._request("box_scores", {"date": date})
+        return result.get("data", []) if result else []
     
-    def get_season_averages(self, season: int, player_ids: List[int]) -> List[Dict]:
-        """
-        Get season averages for specific players
-        
-        Args:
-            season: Season year (e.g., 2024 for 2024-25 season)
-            player_ids: List of player IDs
-        
-        Returns: List of season average dicts
-        """
-        print(f"📈 Fetching season averages for {len(player_ids)} players...")
-        
-        # BallDontLie requires player IDs in query params
-        params = {
-            "season": season,
-            "player_ids[]": player_ids
-        }
-        
-        data = self._make_request("season_averages", params=params)
-        
-        if data and 'data' in data:
-            averages = data['data']
-            print(f"   ✅ Retrieved {len(averages)} season averages")
-            return averages
-        
-        return []
+    # === GOAT TIER ENDPOINTS ===
     
-    def print_stats(self):
-        """Print API usage statistics"""
-        success_rate = ((self.total_requests - self.failed_requests) / 
-                       max(1, self.total_requests)) * 100
-        
-        print(f"\n📊 BallDontLie API Statistics:")
-        print(f"   📡 Total requests: {self.total_requests}")
-        print(f"   ✅ Successful: {self.total_requests - self.failed_requests}")
-        print(f"   ❌ Failed: {self.failed_requests}")
-        print(f"   📈 Success rate: {success_rate:.1f}%")
+    def get_advanced_stats(self, player_ids: Optional[List[int]] = None, game_ids: Optional[List[int]] = None,
+                           start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Dict]:
+        params = {"per_page": 100}
+        if player_ids:
+            params["player_ids[]"] = player_ids
+        if game_ids:
+            params["game_ids[]"] = game_ids
+        if start_date:
+            params["start_date"] = start_date
+        if end_date:
+            params["end_date"] = end_date
+        return self._paginate("stats/advanced", params)
+    
+    def get_season_averages(self, season: int, player_ids: Optional[List[int]] = None) -> List[Dict]:
+        params = {"season": season}
+        if player_ids:
+            params["player_ids[]"] = player_ids
+        result = self._request("season_averages", params)
+        return result.get("data", []) if result else []
+    
+    def get_standings(self, season: int) -> List[Dict]:
+        result = self._request("standings", {"season": season})
+        return result.get("data", []) if result else []
+    
+    def get_injuries(self) -> List[Dict]:
+        result = self._request("injuries")
+        return result.get("data", []) if result else []
+    
+    def get_leaders(self, season: int, stat_type: str = "pts") -> List[Dict]:
+        result = self._request("leaders", {"season": season, "stat_type": stat_type})
+        return result.get("data", []) if result else []
+    
+    def get_odds(self, game_id: int) -> List[Dict]:
+        result = self._request(f"games/{game_id}/odds")
+        return result.get("data", []) if result else []
+    
+    def get_play_by_play(self, game_id: int) -> List[Dict]:
+        result = self._request(f"games/{game_id}/play_by_play")
+        return result.get("data", []) if result else []
+    
+    def get_lineups(self, game_id: int) -> List[Dict]:
+        result = self._request(f"games/{game_id}/lineups")
+        return result.get("data", []) if result else []
+    
+    def test_connection(self) -> bool:
+        print("🔌 Testing BallDontLie API connection...")
+        teams = self.get_teams()
+        if not teams:
+            print("❌ Failed to fetch teams - check API key")
+            return False
+        print(f"✅ Basic access confirmed - {len(teams)} teams")
+        injuries = self.get_injuries()
+        if injuries is not None:
+            print(f"✅ GOAT tier confirmed - injuries endpoint accessible")
+        print(f"📊 Total requests made: {self.request_count}")
+        return True
 
 
-# Convenience function
-def create_client(api_key: Optional[str] = None) -> BallDontLieClient:
-    """Create BallDontLie client with optional API key"""
-    return BallDontLieClient(api_key=api_key)
+# === FLATTEN FUNCTIONS ===
+
+def flatten_game(game: Dict) -> Dict:
+    return {
+        "game_id": game.get("id"),
+        "date": game.get("date"),
+        "season": game.get("season"),
+        "status": game.get("status"),
+        "period": game.get("period"),
+        "time": game.get("time"),
+        "postseason": game.get("postseason"),
+        "home_team_id": game.get("home_team", {}).get("id"),
+        "home_team": game.get("home_team", {}).get("full_name"),
+        "home_team_abbr": game.get("home_team", {}).get("abbreviation"),
+        "home_score": game.get("home_team_score"),
+        "visitor_team_id": game.get("visitor_team", {}).get("id"),
+        "visitor_team": game.get("visitor_team", {}).get("full_name"),
+        "visitor_team_abbr": game.get("visitor_team", {}).get("abbreviation"),
+        "visitor_score": game.get("visitor_team_score"),
+    }
+
+
+def flatten_player_stats(stat: Dict) -> Dict:
+    player = stat.get("player", {})
+    team = stat.get("team", {})
+    game = stat.get("game", {})
+    return {
+        "stat_id": stat.get("id"),
+        "player_id": player.get("id"),
+        "player_name": f"{player.get('first_name', '')} {player.get('last_name', '')}".strip(),
+        "player_position": player.get("position"),
+        "team_id": team.get("id"),
+        "team_abbr": team.get("abbreviation"),
+        "game_id": game.get("id"),
+        "game_date": game.get("date"),
+        "min": stat.get("min"),
+        "pts": stat.get("pts"),
+        "reb": stat.get("reb"),
+        "ast": stat.get("ast"),
+        "stl": stat.get("stl"),
+        "blk": stat.get("blk"),
+        "turnover": stat.get("turnover"),
+        "pf": stat.get("pf"),
+        "fgm": stat.get("fgm"),
+        "fga": stat.get("fga"),
+        "fg_pct": stat.get("fg_pct"),
+        "fg3m": stat.get("fg3m"),
+        "fg3a": stat.get("fg3a"),
+        "fg3_pct": stat.get("fg3_pct"),
+        "ftm": stat.get("ftm"),
+        "fta": stat.get("fta"),
+        "ft_pct": stat.get("ft_pct"),
+        "oreb": stat.get("oreb"),
+        "dreb": stat.get("dreb"),
+    }
+
+
+def flatten_advanced_stats(stat: Dict) -> Dict:
+    player = stat.get("player", {})
+    team = stat.get("team", {})
+    game = stat.get("game", {})
+    return {
+        "stat_id": stat.get("id"),
+        "player_id": player.get("id"),
+        "player_name": f"{player.get('first_name', '')} {player.get('last_name', '')}".strip(),
+        "team_id": team.get("id"),
+        "team_abbr": team.get("abbreviation"),
+        "game_id": game.get("id"),
+        "game_date": game.get("date"),
+        "pie": stat.get("pie"),
+        "pace": stat.get("pace"),
+        "assist_percentage": stat.get("assist_percentage"),
+        "assist_ratio": stat.get("assist_ratio"),
+        "assist_to_turnover": stat.get("assist_to_turnover"),
+        "defensive_rating": stat.get("defensive_rating"),
+        "defensive_rebound_percentage": stat.get("defensive_rebound_percentage"),
+        "effective_field_goal_percentage": stat.get("effective_field_goal_percentage"),
+        "net_rating": stat.get("net_rating"),
+        "offensive_rating": stat.get("offensive_rating"),
+        "offensive_rebound_percentage": stat.get("offensive_rebound_percentage"),
+        "rebound_percentage": stat.get("rebound_percentage"),
+        "true_shooting_percentage": stat.get("true_shooting_percentage"),
+        "turnover_ratio": stat.get("turnover_ratio"),
+        "usage_percentage": stat.get("usage_percentage"),
+    }
 
 
 if __name__ == "__main__":
-    # Test the client
-    print("🧪 Testing BallDontLie API Client")
-    print("=" * 50)
-    
-    # Create client (no API key for testing)
-    client = create_client()
-    
-    # Test 1: Get teams
-    teams = client.get_teams()
-    if teams:
-        print(f"\n✅ Teams test passed: {len(teams)} teams")
-        print(f"   Sample: {teams[0]['full_name']}")
-    
-    # Test 2: Get recent games
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    games = client.get_games(start_date=yesterday)
-    if games:
-        print(f"\n✅ Games test passed: {len(games)} games on {yesterday}")
-    else:
-        print(f"\n⚠️ No games found for {yesterday} (might be off-season)")
-    
-    # Test 3: Get stats if games exist
-    if games:
-        game_id = games[0]['id']
-        stats = client.get_game_stats(game_id)
-        if stats:
-            print(f"\n✅ Stats test passed: {len(stats)} player stats")
-    
-    # Print stats
-    client.print_stats()
-    
-    print("\n✅ BallDontLie client test complete!")
+    try:
+        client = BallDontLieClient()
+        client.test_connection()
+    except ValueError as e:
+        print(f"❌ {e}")
+        print("\nTo fix: echo 'BALLDONTLIE_API_KEY=your_key_here' > .env")

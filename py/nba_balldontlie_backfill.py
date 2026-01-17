@@ -1,404 +1,267 @@
 #!/usr/bin/env python3
 """
-NBA Data Backfill - BallDontLie API Edition
-Clean, simple, and reliable NBA data collection
-
-Collects:
-- Games (schedule, scores, results)
-- Box scores (player stats per game)
-- Team information
-- Season averages
-
-Claude handles: injuries, lineups, trends, referee assignments, etc.
+NBA BallDontLie Data Backfill - GOAT Tier
+Comprehensive data collection for betting analytics
 """
 
 import argparse
 import os
-import pandas as pd
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
-import sys
+from typing import List, Optional
+import pandas as pd
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
 
-from py.nba_balldontlie_client import create_client
-
-
-def collect_teams(client, out_dir: str) -> str:
-    """
-    Collect all NBA teams
-    Run this once at the start of each season
-    """
-    print("\n📋 Collecting NBA Teams...")
-    
-    teams_data = client.get_teams()
-    
-    if not teams_data:
-        print("❌ No teams data retrieved")
-        return None
-    
-    # Convert to DataFrame
-    df = pd.DataFrame(teams_data)
-    
-    # Save to parquet
-    out_file = os.path.join(out_dir, 'nba_teams.parquet')
-    df.to_parquet(out_file, index=False)
-    
-    print(f"✅ Teams: {len(df)} teams → {out_file}")
-    
-    # Show sample
-    print(f"\n📊 Sample teams:")
-    print(df[['id', 'abbreviation', 'full_name', 'conference', 'division']].head())
-    
-    return out_file
+from nba_balldontlie_client import (
+    BallDontLieClient, 
+    flatten_game, 
+    flatten_player_stats,
+    flatten_advanced_stats
+)
 
 
-def collect_games(client, date_str: str, out_dir: str, season: Optional[int] = None) -> str:
-    """
-    Collect games for a specific date
-    
-    Args:
-        client: BallDontLie client
-        date_str: Date in YYYY-MM-DD format
-        out_dir: Output directory
-        season: Optional season year (e.g., 2024)
-    """
-    print(f"\n📅 Collecting Games for {date_str}...")
-    
-    # Get games for the date
-    params = {
-        "start_date": date_str,
-        "end_date": date_str
-    }
-    
-    if season:
-        params["seasons"] = [season]
-    
-    games_data = client.get_games(**params)
-    
-    if not games_data:
-        print(f"   ℹ️ No games found for {date_str}")
-        # Create empty file
-        df = pd.DataFrame(columns=['id', 'date', 'season'])
-        out_file = os.path.join(out_dir, f'nba_games_{date_str}.parquet')
-        df.to_parquet(out_file, index=False)
-        return out_file
-    
-    # Convert to DataFrame
-    df = pd.DataFrame(games_data)
-    
-    # Flatten nested team data
-    if 'home_team' in df.columns:
-        df['home_team_id'] = df['home_team'].apply(lambda x: x['id'] if isinstance(x, dict) else None)
-        df['home_team_name'] = df['home_team'].apply(lambda x: x['full_name'] if isinstance(x, dict) else None)
-        df['home_team_abbrev'] = df['home_team'].apply(lambda x: x['abbreviation'] if isinstance(x, dict) else None)
-    
-    if 'visitor_team' in df.columns:
-        df['away_team_id'] = df['visitor_team'].apply(lambda x: x['id'] if isinstance(x, dict) else None)
-        df['away_team_name'] = df['visitor_team'].apply(lambda x: x['full_name'] if isinstance(x, dict) else None)
-        df['away_team_abbrev'] = df['visitor_team'].apply(lambda x: x['abbreviation'] if isinstance(x, dict) else None)
-    
-    # Add game date (extract from date field)
-    df['game_date'] = date_str
-    
-    # Select key columns
-    key_columns = [
-        'id', 'date', 'game_date', 'season', 'status',
-        'home_team_id', 'home_team_name', 'home_team_abbrev', 'home_team_score',
-        'away_team_id', 'away_team_name', 'away_team_abbrev', 'visitor_team_score',
-        'period', 'time', 'postseason'
-    ]
-    
-    # Keep only columns that exist
-    available_columns = [col for col in key_columns if col in df.columns]
-    df_clean = df[available_columns].copy()
-    
-    # Rename for consistency
-    if 'visitor_team_score' in df_clean.columns:
-        df_clean = df_clean.rename(columns={'visitor_team_score': 'away_team_score'})
-    
-    # Save to parquet
-    out_file = os.path.join(out_dir, f'nba_games_{date_str}.parquet')
-    df_clean.to_parquet(out_file, index=False)
-    
-    print(f"✅ Games: {len(df_clean)} games → {out_file}")
-    
-    # Show summary
-    if len(df_clean) > 0:
-        print(f"\n📊 Games summary:")
-        for _, game in df_clean.head(5).iterrows():
-            home = game.get('home_team_abbrev', 'HOME')
-            away = game.get('away_team_abbrev', 'AWAY')
-            home_score = game.get('home_team_score', 0)
-            away_score = game.get('away_team_score', 0)
-            status = game.get('status', 'Unknown')
-            print(f"   {away} @ {home}: {away_score}-{home_score} ({status})")
-    
-    return out_file
-
-
-def collect_box_scores(client, date_str: str, out_dir: str) -> str:
-    """
-    Collect box scores (player stats) for all games on a date
-    
-    Args:
-        client: BallDontLie client
-        date_str: Date in YYYY-MM-DD format
-        out_dir: Output directory
-    """
-    print(f"\n📊 Collecting Box Scores for {date_str}...")
-    
-    # Get all stats for the date (more efficient than per-game)
-    stats_data = client.get_stats_for_date(date_str)
-    
-    if not stats_data:
-        print(f"   ℹ️ No box scores found for {date_str}")
-        # Create empty file
-        df = pd.DataFrame(columns=['id', 'game_id', 'player_id'])
-        out_file = os.path.join(out_dir, f'nba_box_scores_{date_str}.parquet')
-        df.to_parquet(out_file, index=False)
-        return out_file
-    
-    # Convert to DataFrame
-    df = pd.DataFrame(stats_data)
-    
-    # Flatten nested data
-    if 'player' in df.columns:
-        df['player_id'] = df['player'].apply(lambda x: x['id'] if isinstance(x, dict) else None)
-        df['player_first_name'] = df['player'].apply(lambda x: x['first_name'] if isinstance(x, dict) else None)
-        df['player_last_name'] = df['player'].apply(lambda x: x['last_name'] if isinstance(x, dict) else None)
-        df['player_position'] = df['player'].apply(lambda x: x['position'] if isinstance(x, dict) else None)
-    
-    if 'team' in df.columns:
-        df['team_id'] = df['team'].apply(lambda x: x['id'] if isinstance(x, dict) else None)
-        df['team_name'] = df['team'].apply(lambda x: x['full_name'] if isinstance(x, dict) else None)
-        df['team_abbrev'] = df['team'].apply(lambda x: x['abbreviation'] if isinstance(x, dict) else None)
-    
-    if 'game' in df.columns:
-        df['game_id'] = df['game'].apply(lambda x: x['id'] if isinstance(x, dict) else None)
-        df['game_date'] = df['game'].apply(lambda x: x['date'] if isinstance(x, dict) else None)
-    
-    # Add date
-    df['stat_date'] = date_str
-    
-    # Select key columns (all the stats BallDontLie provides)
-    key_columns = [
-        'id', 'game_id', 'player_id', 'team_id', 'team_abbrev',
-        'player_first_name', 'player_last_name', 'player_position',
-        'min', 'fgm', 'fga', 'fg_pct', 'fg3m', 'fg3a', 'fg3_pct',
-        'ftm', 'fta', 'ft_pct', 'oreb', 'dreb', 'reb',
-        'ast', 'stl', 'blk', 'turnover', 'pf', 'pts',
-        'stat_date'
-    ]
-    
-    # Keep only columns that exist
-    available_columns = [col for col in key_columns if col in df.columns]
-    df_clean = df[available_columns].copy()
-    
-    # Convert minutes (might be in "MM:SS" format)
-    if 'min' in df_clean.columns:
-        def convert_minutes(min_val):
-            if pd.isna(min_val) or min_val == '':
-                return 0.0
-            try:
-                if isinstance(min_val, str) and ':' in min_val:
-                    parts = min_val.split(':')
-                    return int(parts[0]) + int(parts[1]) / 60.0
-                else:
-                    return float(min_val)
-            except:
-                return 0.0
+class NBADataBackfill:
+    def __init__(self, api_key: Optional[str] = None, output_dir: str = "stage"):
+        self.client = BallDontLieClient(api_key)
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        df_clean['minutes_played'] = df_clean['min'].apply(convert_minutes)
-    
-    # Save to parquet
-    out_file = os.path.join(out_dir, f'nba_box_scores_{date_str}.parquet')
-    df_clean.to_parquet(out_file, index=False)
-    
-    print(f"✅ Box Scores: {len(df_clean)} player stats → {out_file}")
-    
-    # Show top scorers
-    if len(df_clean) > 0 and 'pts' in df_clean.columns:
-        print(f"\n🏆 Top scorers:")
-        top_scorers = df_clean.nlargest(5, 'pts')
-        for _, player in top_scorers.iterrows():
-            name = f"{player.get('player_first_name', '')} {player.get('player_last_name', '')}".strip()
-            team = player.get('team_abbrev', 'TEAM')
-            points = player.get('pts', 0)
-            rebounds = player.get('reb', 0)
-            assists = player.get('ast', 0)
-            print(f"   {name} ({team}): {points} pts, {rebounds} reb, {assists} ast")
-    
-    return out_file
-
-
-def create_combined_daily_file(date_str: str, out_dir: str) -> Optional[str]:
-    """
-    Combine games and box scores into single daily file for easy analysis
-    
-    Args:
-        date_str: Date in YYYY-MM-DD format
-        out_dir: Output directory
-    """
-    print(f"\n📦 Creating combined daily file for {date_str}...")
-    
-    games_file = os.path.join(out_dir, f'nba_games_{date_str}.parquet')
-    box_scores_file = os.path.join(out_dir, f'nba_box_scores_{date_str}.parquet')
-    
-    # Check if files exist
-    if not os.path.exists(games_file):
-        print(f"   ⚠️ Games file not found: {games_file}")
-        return None
-    
-    if not os.path.exists(box_scores_file):
-        print(f"   ⚠️ Box scores file not found: {box_scores_file}")
-        return None
-    
-    try:
-        # Read files
-        games_df = pd.read_parquet(games_file)
-        box_scores_df = pd.read_parquet(box_scores_file)
-        
-        if games_df.empty:
-            print(f"   ℹ️ No games data to combine")
+    def save_parquet(self, data: List[dict], name: str, subdir: str = ""):
+        if not data:
+            print(f"   ⚠️ No data to save for {name}")
             return None
+        df = pd.DataFrame(data)
+        save_dir = self.output_dir / subdir if subdir else self.output_dir
+        save_dir.mkdir(parents=True, exist_ok=True)
+        filepath = save_dir / f"{name}.parquet"
+        df.to_parquet(filepath, index=False)
+        print(f"   💾 Saved {len(df)} rows to {filepath}")
+        return filepath
+    
+    def generate_date_range(self, start: str, end: str) -> List[str]:
+        start_dt = datetime.strptime(start, "%Y-%m-%d")
+        end_dt = datetime.strptime(end, "%Y-%m-%d")
+        dates = []
+        current = start_dt
+        while current <= end_dt:
+            dates.append(current.strftime("%Y-%m-%d"))
+            current += timedelta(days=1)
+        return dates
+    
+    # === CORE DATA COLLECTION ===
+    
+    def backfill_teams(self):
+        print("\n🏀 Collecting teams...")
+        teams = self.client.get_teams()
+        self.save_parquet(teams, "teams", "reference")
+        return teams
+    
+    def backfill_players(self):
+        print("\n👤 Collecting players...")
+        players = self.client.get_players()
+        self.save_parquet(players, "players", "reference")
+        return players
+    
+    def backfill_games(self, start_date: str, end_date: str):
+        print(f"\n📅 Collecting games: {start_date} to {end_date}...")
+        games = self.client.get_games(start_date, end_date)
+        if games:
+            flat_games = [flatten_game(g) for g in games]
+            self.save_parquet(flat_games, f"games_{start_date}_{end_date}", "games")
+        return games
+    
+    def backfill_player_stats(self, start_date: str, end_date: str):
+        print(f"\n📊 Collecting player stats: {start_date} to {end_date}...")
+        stats = self.client.get_stats(start_date=start_date, end_date=end_date)
+        if stats:
+            flat_stats = [flatten_player_stats(s) for s in stats]
+            self.save_parquet(flat_stats, f"player_stats_{start_date}_{end_date}", "stats")
+        return stats
+    
+    def backfill_box_scores_daily(self, start_date: str, end_date: str):
+        print(f"\n📦 Collecting daily box scores: {start_date} to {end_date}...")
+        dates = self.generate_date_range(start_date, end_date)
+        all_box_scores = []
+        for i, date in enumerate(dates, 1):
+            print(f"   [{i}/{len(dates)}] {date}...")
+            box_scores = self.client.get_box_scores(date)
+            if box_scores:
+                all_box_scores.extend(box_scores)
+        if all_box_scores:
+            self.save_parquet(all_box_scores, f"box_scores_{start_date}_{end_date}", "box_scores")
+        return all_box_scores
+    
+    # === GOAT TIER DATA COLLECTION ===
+    
+    def backfill_advanced_stats(self, start_date: str, end_date: str):
+        print(f"\n📈 Collecting advanced stats: {start_date} to {end_date}...")
+        stats = self.client.get_advanced_stats(start_date=start_date, end_date=end_date)
+        if stats:
+            flat_stats = [flatten_advanced_stats(s) for s in stats]
+            self.save_parquet(flat_stats, f"advanced_stats_{start_date}_{end_date}", "advanced")
+        return stats
+    
+    def backfill_season_averages(self, season: int, player_ids: Optional[List[int]] = None):
+        print(f"\n📊 Collecting season averages for {season}...")
+        averages = self.client.get_season_averages(season, player_ids)
+        if averages:
+            self.save_parquet(averages, f"season_averages_{season}", "season_averages")
+        return averages
+    
+    def backfill_standings(self, season: int):
+        print(f"\n🏆 Collecting standings for {season}...")
+        standings = self.client.get_standings(season)
+        if standings:
+            self.save_parquet(standings, f"standings_{season}", "standings")
+        return standings
+    
+    def backfill_injuries(self):
+        print("\n🏥 Collecting current injuries...")
+        injuries = self.client.get_injuries()
+        today = datetime.now().strftime("%Y-%m-%d")
+        if injuries:
+            self.save_parquet(injuries, f"injuries_{today}", "injuries")
+        return injuries
+    
+    def backfill_leaders(self, season: int, stat_types: Optional[List[str]] = None):
+        print(f"\n🌟 Collecting league leaders for {season}...")
+        if stat_types is None:
+            stat_types = ["pts", "reb", "ast", "stl", "blk", "fg_pct", "fg3_pct", "ft_pct"]
+        all_leaders = {}
+        for stat in stat_types:
+            print(f"   Fetching {stat} leaders...")
+            leaders = self.client.get_leaders(season, stat)
+            if leaders:
+                all_leaders[stat] = leaders
+        combined = []
+        for stat_type, leaders in all_leaders.items():
+            for leader in leaders:
+                leader["stat_type"] = stat_type
+                combined.append(leader)
+        if combined:
+            self.save_parquet(combined, f"leaders_{season}", "leaders")
+        return all_leaders
+    
+    def backfill_odds(self, game_ids: List[int]):
+        print(f"\n💰 Collecting odds for {len(game_ids)} games...")
+        all_odds = []
+        for i, game_id in enumerate(game_ids, 1):
+            print(f"   [{i}/{len(game_ids)}] Game {game_id}...")
+            odds = self.client.get_odds(game_id)
+            if odds:
+                for odd in odds:
+                    odd["game_id"] = game_id
+                all_odds.extend(odds)
+        if all_odds:
+            self.save_parquet(all_odds, f"odds_batch", "odds")
+        return all_odds
+    
+    def backfill_play_by_play(self, game_ids: List[int]):
+        print(f"\n🎬 Collecting play-by-play for {len(game_ids)} games...")
+        all_pbp = []
+        for i, game_id in enumerate(game_ids, 1):
+            print(f"   [{i}/{len(game_ids)}] Game {game_id}...")
+            pbp = self.client.get_play_by_play(game_id)
+            if pbp:
+                for play in pbp:
+                    play["game_id"] = game_id
+                all_pbp.extend(pbp)
+        if all_pbp:
+            self.save_parquet(all_pbp, f"play_by_play_batch", "play_by_play")
+        return all_pbp
+    
+    # === COMPREHENSIVE BACKFILL ===
+    
+    def run_full_backfill(self, start_date: str, end_date: str, season: Optional[int] = None):
+        print("=" * 60)
+        print(f"🏀 NBA FULL DATA BACKFILL")
+        print(f"   Date Range: {start_date} to {end_date}")
+        print(f"   Output: {self.output_dir}")
+        print("=" * 60)
         
-        # Merge on game_id
-        combined_df = box_scores_df.merge(
-            games_df,
-            left_on='game_id',
-            right_on='id',
-            how='left',
-            suffixes=('_player', '_game')
-        )
+        if season is None:
+            start_year = int(start_date[:4])
+            start_month = int(start_date[5:7])
+            season = start_year if start_month >= 10 else start_year - 1
         
-        # Save combined file
-        out_file = os.path.join(out_dir, f'nba_complete_{date_str}.parquet')
-        combined_df.to_parquet(out_file, index=False)
+        self.backfill_teams()
+        self.backfill_players()
+        games = self.backfill_games(start_date, end_date)
+        self.backfill_player_stats(start_date, end_date)
+        self.backfill_box_scores_daily(start_date, end_date)
+        self.backfill_advanced_stats(start_date, end_date)
+        self.backfill_season_averages(season)
+        self.backfill_standings(season)
+        self.backfill_injuries()
+        self.backfill_leaders(season)
         
-        print(f"✅ Combined: {len(combined_df)} records → {out_file}")
+        if games and start_date >= "2025-01-01":
+            game_ids = [g.get("id") for g in games if g.get("id")]
+            if game_ids:
+                self.backfill_odds(game_ids)
+                self.backfill_play_by_play(game_ids)
         
-        return out_file
-        
-    except Exception as e:
-        print(f"   ❌ Failed to create combined file: {e}")
-        return None
+        print("\n" + "=" * 60)
+        print(f"✅ BACKFILL COMPLETE")
+        print(f"   Total API requests: {self.client.request_count}")
+        print(f"   Data saved to: {self.output_dir}")
+        print("=" * 60)
+    
+    def run_daily_update(self, date: Optional[str] = None):
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+        print("=" * 60)
+        print(f"🏀 NBA DAILY UPDATE: {date}")
+        print("=" * 60)
+        self.backfill_games(date, date)
+        self.backfill_player_stats(date, date)
+        self.backfill_box_scores_daily(date, date)
+        self.backfill_advanced_stats(date, date)
+        self.backfill_injuries()
+        if date >= "2025-01-01":
+            games = self.client.get_games(date, date)
+            if games:
+                game_ids = [g.get("id") for g in games if g.get("id")]
+                if game_ids:
+                    self.backfill_odds(game_ids)
+        print(f"\n✅ Daily update complete ({self.client.request_count} requests)")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='NBA Data Collection via BallDontLie API - Simple and Reliable'
-    )
-    parser.add_argument('--start', required=True, help='Start date (YYYY-MM-DD)')
-    parser.add_argument('--end', required=True, help='End date (YYYY-MM-DD)')
-    parser.add_argument('--out-dir', default='stage', help='Output directory (default: stage)')
-    parser.add_argument('--api-key', help='BallDontLie API key (optional, increases rate limit)')
-    parser.add_argument('--season', type=int, help='Filter by season year (e.g., 2024)')
-    parser.add_argument('--collect-teams', action='store_true', help='Also collect team data')
-    parser.add_argument('--no-combined', action='store_true', help='Skip creating combined daily files')
+    parser = argparse.ArgumentParser(description="NBA BallDontLie Data Backfill")
+    parser.add_argument("--start", required=True, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end", required=True, help="End date (YYYY-MM-DD)")
+    parser.add_argument("--api-key", help="BallDontLie API key (or set BALLDONTLIE_API_KEY env)")
+    parser.add_argument("--output", default="stage", help="Output directory (default: stage)")
+    parser.add_argument("--full", action="store_true", help="Run full backfill with all data types")
+    parser.add_argument("--daily", action="store_true", help="Quick daily update mode")
+    parser.add_argument("--season", type=int, help="Season year (e.g., 2024 for 2024-25 season)")
     
     args = parser.parse_args()
     
-    print("🏀 NBA Data Collection - BallDontLie API")
-    print("=" * 60)
-    print(f"📅 Date range: {args.start} to {args.end}")
-    print(f"📁 Output: {args.out_dir}")
-    
-    # Create output directory
-    os.makedirs(args.out_dir, exist_ok=True)
-    
-    # Create API client
-    client = create_client(api_key=args.api_key)
-    
-    # Optionally collect teams
-    if args.collect_teams:
-        collect_teams(client, args.out_dir)
-    
-    # Parse date range
     try:
-        start_date = datetime.strptime(args.start, '%Y-%m-%d')
-        end_date = datetime.strptime(args.end, '%Y-%m-%d')
-        
-        if start_date > end_date:
-            print("❌ Start date must be before or equal to end date")
-            return 1
-        
+        backfill = NBADataBackfill(api_key=args.api_key, output_dir=args.output)
+        if args.daily:
+            backfill.run_daily_update(args.start)
+        elif args.full:
+            backfill.run_full_backfill(args.start, args.end, args.season)
+        else:
+            print(f"📅 Basic backfill: {args.start} to {args.end}")
+            backfill.backfill_games(args.start, args.end)
+            backfill.backfill_player_stats(args.start, args.end)
     except ValueError as e:
-        print(f"❌ Invalid date format: {e}")
-        print("   Use YYYY-MM-DD format (e.g., 2024-11-13)")
-        return 1
-    
-    # Process each date
-    total_days = (end_date - start_date).days + 1
-    print(f"\n🔄 Processing {total_days} day(s)...")
-    
-    current_date = start_date
-    success_count = 0
-    error_count = 0
-    
-    while current_date <= end_date:
-        date_str = current_date.strftime('%Y-%m-%d')
-        
-        print(f"\n{'='*60}")
-        print(f"📅 Processing {date_str} ({current_date.strftime('%A')})")
-        print(f"{'='*60}")
-        
-        try:
-            # Collect games
-            games_file = collect_games(client, date_str, args.out_dir, args.season)
-            
-            # Collect box scores
-            box_scores_file = collect_box_scores(client, date_str, args.out_dir)
-            
-            # Create combined file
-            if not args.no_combined:
-                combined_file = create_combined_daily_file(date_str, args.out_dir)
-            
-            success_count += 1
-            print(f"\n✅ {date_str} completed successfully")
-            
-        except Exception as e:
-            error_count += 1
-            print(f"\n❌ {date_str} failed: {e}")
-            continue
-        
-        current_date += timedelta(days=1)
-    
-    # Final summary
-    print(f"\n{'='*60}")
-    print(f"📊 Collection Summary")
-    print(f"{'='*60}")
-    print(f"   ✅ Successful: {success_count} days")
-    print(f"   ❌ Failed: {error_count} days")
-    print(f"   📈 Success rate: {(success_count/total_days)*100:.1f}%")
-    print(f"   📁 Files saved to: {args.out_dir}")
-    
-    # API stats
-    print(f"\n{'='*60}")
-    client.print_stats()
-    
-    print(f"\n🎯 Next Steps:")
-    print(f"   1. Check your data: ls {args.out_dir}/")
-    print(f"   2. Convert to CSV: python convert_parquet_to_csv.py --input-dir {args.out_dir}")
-    print(f"   3. Load to database: python loader/nba_load_balldontlie_data.py")
-    print(f"   4. Send to Claude for betting analysis!")
-    
-    print(f"\n💡 What You Have:")
-    print(f"   ✅ Games: Schedule, scores, team matchups")
-    print(f"   ✅ Box Scores: All player stats per game")
-    print(f"   ✅ Combined Files: Ready for analysis")
-    
-    print(f"\n🤖 What Claude Provides:")
-    print(f"   🔍 Injury reports and player status")
-    print(f"   📋 Starting lineups and rotations")
-    print(f"   👔 Referee assignments and tendencies")
-    print(f"   📊 Recent form and trends")
-    print(f"   🎯 Betting insights and recommendations")
-    
-    return 0 if error_count == 0 else 1
+        print(f"❌ Error: {e}")
+        print("\nMake sure you have set your API key:")
+        print("  export BALLDONTLIE_API_KEY=your_key_here")
+        print("  OR")
+        print("  echo 'BALLDONTLIE_API_KEY=your_key_here' > .env")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\n\n⚠️ Interrupted by user")
+        sys.exit(0)
 
 
-if __name__ == '__main__':
-    sys.exit(main())
+if __name__ == "__main__":
+    main()
