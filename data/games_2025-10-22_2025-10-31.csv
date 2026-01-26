@@ -1,0 +1,79 @@
+game_id,date,datetime,season,status,period,time,postseason,postponed,ist_stage,home_team_id,home_team_abbr,home_team_name,home_score,home_q1,home_q2,home_q3,home_q4,home_ot1,home_ot2,home_ot3,home_timeouts,home_in_bonus,visitor_team_id,visitor_team_abbr,visitor_team_name,visitor_score,visitor_q1,visitor_q2,visitor_q3,visitor_q4,visitor_ot1,visitor_ot2,visitor_ot3,visitor_timeouts,visitor_in_bonus
+18446821,2025-10-22,2025-10-22T23:00:00.000Z,2025,Final,4,Final,False,False,,20,NYK,New York Knicks,119,33,32,22,32,,,,3,True,6,CLE,Cleveland Cavaliers,111,23,27,37,24,,,,1,True
+18446822,2025-10-22,2025-10-23T01:30:00.000Z,2025,Final,4,Final,False,False,,7,DAL,Dallas Mavericks,92,29,22,21,20,,,,2,True,27,SAS,San Antonio Spurs,125,28,32,33,32,,,,2,False
+18446823,2025-10-22,2025-10-22T23:00:00.000Z,2025,Final,4,Final,False,False,,4,CHA,Charlotte Hornets,136,38,39,34,25,,,,2,False,3,BKN,Brooklyn Nets,117,32,28,37,20,,,,2,False
+18446824,2025-10-22,2025-10-22T23:00:00.000Z,2025,Final,4,Final,False,False,,22,ORL,Orlando Magic,125,38,31,21,35,,,,2,True,16,MIA,Miami Heat,121,39,26,26,30,,,,0,True
+18446825,2025-10-22,2025-10-22T23:30:00.000Z,2025,Final,4,Final,False,False,,1,ATL,Atlanta Hawks,118,34,25,28,31,,,,0,True,28,TOR,Toronto Raptors,138,36,29,45,28,,,,2,False
+18446826,2025-10-22,2025-10-22T23:30:00.000Z,2025,Final,4,Final,False,False,,2,BOS,Boston Celtics,116,28,23,35,30,,,,0,True,23,PHI,Philadelphia 76ers,117,26,31,18,42,,,,0,True
+18446827,2025-10-22,2025-10-23T00:00:00.000Z,2025,Final,4,Final,False,False,,5,CHI,Chicago Bulls,115,35,29,30,21,,,,1,True,9,DET,Detroit Pistons,111,19,30,30,32,,,,0,True
+18446828,2025-10-22,2025-10-23T00:00:00.000Z,2025,Final,4,Final,False,False,,15,MEM,Memphis Grizzlies,128,27,29,41,31,,,,0,True,19,NOP,New Orleans Pelicans,122,30,37,22,33,,,,0,True
+18446829,2025-10-22,2025-10-23T00:00:00.000Z,2025,Final,4,Final,False,False,,17,MIL,Milwaukee Bucks,133,40,32,29,32,,,,2,True,30,WAS,Washington Wizards,120,23,30,37,30,,,,1,False
+18446830,2025-10-22,2025-10-23T01:00:00.000Z,2025,Final,4,Final,False,False,,29,UTA,Utah Jazz,129,43,35,30,21,,,,2,True,13,LAC,LA Clippers,108,19,28,33,28,,,,2,True
+18446831,2025-10-22,2025-10-23T02:00:00.000Z,2025,Final,4,Final,False,False,,24,PHX,Phoenix Suns,120,19,35,36,30,,,,2,True,26,SAC,Sacramento Kings,116,29,42,21,24,,,,0,True
+18446832,2025-10-22,2025-10-23T02:00:00.000Z,2025,Final,4,Final,False,False,,25,POR,Portland Trail Blazers,114,35,26,34,19,,,,0,True,18,MIN,Minnesota Timberwolves,118,33,24,31,30,,,,2,True
+18446833,2025-10-23,2025-10-23T23:30:00.000Z,2025,Final,6,Final,False,False,,12,IND,Indiana Pacers,135,25,22,31,35,11.0,11.0,,0,False,21,OKC,Oklahoma City Thunder,141,22,32,27,32,11.0,17.0,,1,True
+18446834,2025-10-23,2025-10-24T02:00:00.000Z,2025,Final,5,Final,False,False,,10,GSW,Golden State Warriors,137,27,34,33,26,17.0,,,2,True,8,DEN,Denver Nuggets,131,31,39,24,26,11.0,,,0,False
+18446835,2025-10-24,2025-10-24T23:30:00.000Z,2025,Final,4,Final,False,False,,20,NYK,New York Knicks,105,22,42,18,23,,,,1,True,2,BOS,Boston Celtics,95,30,14,21,30,,,,2,True
+18446836,2025-10-24,2025-10-25T02:00:00.000Z,2025,Final,4,Final,False,False,,14,LAL,Los Angeles Lakers,128,36,32,40,20,,,,2,True,18,MIN,Minnesota Timberwolves,110,40,23,31,16,,,,2,False
+18446837,2025-10-24,2025-10-24T23:00:00.000Z,2025,Final,4,Final,False,False,,22,ORL,Orlando Magic,107,24,37,25,21,,,,0,True,1,ATL,Atlanta Hawks,111,25,26,27,33,,,,0,True
+18446838,2025-10-24,2025-10-24T23:30:00.000Z,2025,Final,4,Final,False,False,,3,BKN,Brooklyn Nets,124,23,28,35,38,,,,0,False,6,CLE,Cleveland Cavaliers,131,34,29,45,23,,,,1,True
+18446839,2025-10-24,2025-10-24T22:30:00.000Z,2025,Final,4,Final,False,False,,28,TOR,Toronto Raptors,116,19,35,32,30,,,,0,True,17,MIL,Milwaukee Bucks,122,27,25,34,36,,,,2,True
+18446840,2025-10-24,2025-10-25T00:00:00.000Z,2025,Final,4,Final,False,False,,11,HOU,Houston Rockets,111,33,23,30,25,,,,1,True,9,DET,Detroit Pistons,115,32,31,24,28,,,,1,True
+18446841,2025-10-24,2025-10-25T00:00:00.000Z,2025,Final,4,Final,False,False,,15,MEM,Memphis Grizzlies,114,25,22,29,38,,,,2,True,16,MIA,Miami Heat,146,44,42,28,32,,,,2,False
+18446842,2025-10-24,2025-10-25T00:00:00.000Z,2025,Final,5,Final,False,False,,19,NOP,New Orleans Pelicans,116,27,31,22,27,9.0,,,0,False,27,SAS,San Antonio Spurs,120,30,27,25,25,13.0,,,0,True
+18446843,2025-10-24,2025-10-25T00:30:00.000Z,2025,Final,4,Final,False,False,,7,DAL,Dallas Mavericks,107,35,17,26,29,,,,2,True,30,WAS,Washington Wizards,117,28,30,33,26,,,,0,True
+18446844,2025-10-24,2025-10-25T02:00:00.000Z,2025,Final,4,Final,False,False,,25,POR,Portland Trail Blazers,139,28,41,34,36,,,,2,True,10,GSW,Golden State Warriors,119,28,28,35,28,,,,1,True
+18446845,2025-10-24,2025-10-25T02:00:00.000Z,2025,Final,4,Final,False,False,,26,SAC,Sacramento Kings,105,31,18,29,27,,,,1,False,29,UTA,Utah Jazz,104,24,22,30,28,,,,1,True
+18446846,2025-10-24,2025-10-25T02:30:00.000Z,2025,Final,4,Final,False,False,,13,LAC,LA Clippers,129,34,38,34,23,,,,2,False,24,PHX,Phoenix Suns,102,33,23,21,25,,,,2,True
+18446847,2025-10-25,2025-10-25T23:00:00.000Z,2025,Final,4,Final,False,False,,22,ORL,Orlando Magic,98,30,19,31,18,,,,2,True,5,CHI,Chicago Bulls,110,29,23,31,27,,,,2,True
+18446848,2025-10-25,2025-10-25T23:30:00.000Z,2025,Final,4,Final,False,False,,1,ATL,Atlanta Hawks,100,26,29,25,20,,,,2,True,21,OKC,Oklahoma City Thunder,117,31,29,39,18,,,,2,True
+18446849,2025-10-25,2025-10-25T23:30:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,125,36,25,25,39,,,,1,True,4,CHA,Charlotte Hornets,121,29,29,38,25,,,,0,True
+18446850,2025-10-25,2025-10-26T00:00:00.000Z,2025,Final,4,Final,False,False,,15,MEM,Memphis Grizzlies,128,23,37,43,25,,,,2,True,12,IND,Indiana Pacers,103,21,31,32,19,,,,0,True
+18446851,2025-10-25,2025-10-26T01:00:00.000Z,2025,Final,4,Final,False,False,,8,DEN,Denver Nuggets,133,34,37,29,33,,,,2,True,24,PHX,Phoenix Suns,111,28,26,29,28,,,,2,True
+18446852,2025-10-26,2025-10-26T18:00:00.000Z,2025,Final,4,Final,False,False,,27,SAS,San Antonio Spurs,118,31,38,19,30,,,,2,True,3,BKN,Brooklyn Nets,107,24,24,33,26,,,,0,False
+18446853,2025-10-26,2025-10-26T19:30:00.000Z,2025,Final,4,Final,False,False,,9,DET,Detroit Pistons,119,24,36,34,25,,,,1,True,2,BOS,Boston Celtics,113,33,25,23,32,,,,1,True
+18446854,2025-10-26,2025-10-26T22:00:00.000Z,2025,Final,4,Final,False,False,,6,CLE,Cleveland Cavaliers,118,29,36,21,32,,,,1,True,17,MIL,Milwaukee Bucks,113,31,25,28,29,,,,0,True
+18446855,2025-10-26,2025-10-26T22:00:00.000Z,2025,Final,4,Final,False,False,,16,MIA,Miami Heat,115,24,33,31,27,,,,1,False,20,NYK,New York Knicks,107,27,27,27,26,,,,2,False
+18446856,2025-10-26,2025-10-26T22:00:00.000Z,2025,Final,4,Final,False,False,,30,WAS,Washington Wizards,113,30,32,26,25,,,,0,True,4,CHA,Charlotte Hornets,139,31,20,44,44,,,,2,True
+18446857,2025-10-26,2025-10-26T23:00:00.000Z,2025,Final,4,Final,False,False,,18,MIN,Minnesota Timberwolves,114,28,30,28,28,,,,0,True,12,IND,Indiana Pacers,110,28,32,17,33,,,,0,True
+18446858,2025-10-26,2025-10-26T23:30:00.000Z,2025,Final,4,Final,False,False,,7,DAL,Dallas Mavericks,139,32,32,39,36,,,,1,True,28,TOR,Toronto Raptors,129,32,34,25,38,,,,1,True
+18446859,2025-10-26,2025-10-27T01:00:00.000Z,2025,Final,4,Final,False,False,,13,LAC,LA Clippers,114,34,21,32,27,,,,0,True,25,POR,Portland Trail Blazers,107,23,37,22,25,,,,2,True
+18446860,2025-10-26,2025-10-27T01:00:00.000Z,2025,Final,4,Final,False,False,,26,SAC,Sacramento Kings,120,27,35,28,30,,,,0,True,14,LAL,Los Angeles Lakers,127,36,26,33,32,,,,2,True
+18446861,2025-10-27,2025-10-27T23:00:00.000Z,2025,Final,4,Final,False,False,,9,DET,Detroit Pistons,95,24,17,25,29,,,,0,True,6,CLE,Cleveland Cavaliers,116,33,30,27,26,,,,2,False
+18446862,2025-10-27,2025-10-28T01:30:00.000Z,2025,Final,4,Final,False,False,,18,MIN,Minnesota Timberwolves,114,30,35,29,20,,,,1,True,8,DEN,Denver Nuggets,127,34,23,45,25,,,,1,False
+18446863,2025-10-27,2025-10-27T23:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,136,33,39,29,35,,,,1,True,22,ORL,Orlando Magic,124,28,32,34,30,,,,1,True
+18446864,2025-10-27,2025-10-28T00:00:00.000Z,2025,Final,4,Final,False,False,,5,CHI,Chicago Bulls,128,27,30,41,30,,,,2,True,1,ATL,Atlanta Hawks,123,35,23,34,31,,,,1,False
+18446865,2025-10-27,2025-10-28T00:00:00.000Z,2025,Final,4,Final,False,False,,11,HOU,Houston Rockets,137,42,29,32,34,,,,2,False,3,BKN,Brooklyn Nets,109,25,35,17,32,,,,2,True
+18446866,2025-10-27,2025-10-28T00:00:00.000Z,2025,Final,4,Final,False,False,,19,NOP,New Orleans Pelicans,90,26,28,24,12,,,,1,False,2,BOS,Boston Celtics,122,34,31,22,35,,,,2,False
+18446867,2025-10-27,2025-10-28T00:00:00.000Z,2025,Final,4,Final,False,False,,27,SAS,San Antonio Spurs,121,41,28,26,26,,,,1,False,28,TOR,Toronto Raptors,103,29,21,28,25,,,,0,False
+18446868,2025-10-27,2025-10-28T00:30:00.000Z,2025,Final,4,Final,False,False,,7,DAL,Dallas Mavericks,94,24,18,27,25,,,,0,True,21,OKC,Oklahoma City Thunder,101,28,20,39,14,,,,1,True
+18446869,2025-10-27,2025-10-28T01:00:00.000Z,2025,Final,5,Final,False,False,,29,UTA,Utah Jazz,138,39,25,30,30,14.0,,,2,True,24,PHX,Phoenix Suns,134,27,34,25,38,10.0,,,0,False
+18446870,2025-10-27,2025-10-28T02:00:00.000Z,2025,Final,4,Final,False,False,,10,GSW,Golden State Warriors,131,36,29,36,30,,,,0,False,15,MEM,Memphis Grizzlies,118,37,24,24,33,,,,0,True
+18446871,2025-10-27,2025-10-28T02:30:00.000Z,2025,Final,4,Final,False,False,,14,LAL,Los Angeles Lakers,108,24,27,26,31,,,,2,False,25,POR,Portland Trail Blazers,122,28,29,32,33,,,,2,False
+18446872,2025-10-28,2025-10-28T23:00:00.000Z,2025,Final,5,Final,False,False,,30,WAS,Washington Wizards,134,40,32,38,16,8.0,,,0,False,23,PHI,Philadelphia 76ers,139,32,36,26,32,13.0,,,1,True
+18446873,2025-10-28,2025-10-28T23:30:00.000Z,2025,Final,4,Final,False,False,,16,MIA,Miami Heat,144,37,39,29,39,,,,2,False,4,CHA,Charlotte Hornets,117,34,26,28,29,,,,2,True
+18446874,2025-10-28,2025-10-29T00:00:00.000Z,2025,Final,4,Final,False,False,,17,MIL,Milwaukee Bucks,121,27,32,35,27,,,,2,True,20,NYK,New York Knicks,111,26,45,20,20,,,,2,False
+18446875,2025-10-28,2025-10-29T00:00:00.000Z,2025,Final,4,Final,False,False,,21,OKC,Oklahoma City Thunder,107,24,34,22,27,,,,2,False,26,SAC,Sacramento Kings,101,29,33,21,18,,,,1,False
+18446876,2025-10-28,2025-10-29T03:00:00.000Z,2025,Final,4,Final,False,False,,10,GSW,Golden State Warriors,98,33,13,32,20,,,,2,False,13,LAC,LA Clippers,79,25,24,14,16,,,,0,True
+18446877,2025-10-29,2025-10-29T23:00:00.000Z,2025,Final,4,Final,False,False,,2,BOS,Boston Celtics,125,40,35,23,27,,,,2,True,6,CLE,Cleveland Cavaliers,105,42,18,25,20,,,,2,True
+18446878,2025-10-29,2025-10-29T23:00:00.000Z,2025,Final,4,Final,False,False,,9,DET,Detroit Pistons,135,29,36,36,34,,,,1,True,22,ORL,Orlando Magic,116,36,28,28,24,,,,1,True
+18446879,2025-10-29,2025-10-29T23:30:00.000Z,2025,Final,4,Final,False,False,,3,BKN,Brooklyn Nets,112,27,24,32,29,,,,1,True,1,ATL,Atlanta Hawks,117,34,30,30,23,,,,1,True
+18446880,2025-10-29,2025-10-29T22:30:00.000Z,2025,Final,4,Final,False,False,,28,TOR,Toronto Raptors,121,30,33,28,30,,,,0,True,11,HOU,Houston Rockets,139,39,31,36,33,,,,2,True
+18446881,2025-10-29,2025-10-30T00:00:00.000Z,2025,Final,4,Final,False,False,,5,CHI,Chicago Bulls,126,36,26,39,25,,,,2,False,26,SAC,Sacramento Kings,113,33,31,27,22,,,,2,True
+18446882,2025-10-29,2025-10-30T00:30:00.000Z,2025,Final,4,Final,False,False,,7,DAL,Dallas Mavericks,107,25,27,29,26,,,,1,True,12,IND,Indiana Pacers,105,30,25,19,31,,,,0,True
+18446883,2025-10-29,2025-10-30T01:00:00.000Z,2025,Final,4,Final,False,False,,8,DEN,Denver Nuggets,122,34,19,39,30,,,,2,False,19,NOP,New Orleans Pelicans,88,25,22,11,30,,,,1,True
+18446884,2025-10-29,2025-10-30T01:00:00.000Z,2025,Final,4,Final,False,False,,29,UTA,Utah Jazz,134,43,30,25,36,,,,0,True,25,POR,Portland Trail Blazers,136,33,46,38,19,,,,0,True
+18446885,2025-10-29,2025-10-30T01:30:00.000Z,2025,Final,4,Final,False,False,,18,MIN,Minnesota Timberwolves,115,34,24,28,29,,,,1,True,14,LAL,Los Angeles Lakers,116,32,30,35,19,,,,0,False
+18446886,2025-10-29,2025-10-30T02:00:00.000Z,2025,Final,4,Final,False,False,,24,PHX,Phoenix Suns,113,26,27,25,35,,,,0,True,15,MEM,Memphis Grizzlies,114,27,22,32,33,,,,1,True
+18446887,2025-10-30,2025-10-30T23:00:00.000Z,2025,Final,4,Final,False,False,,4,CHA,Charlotte Hornets,107,31,27,27,22,,,,2,False,22,ORL,Orlando Magic,123,38,33,21,31,,,,1,False
+18446888,2025-10-30,2025-10-31T00:00:00.000Z,2025,Final,4,Final,False,False,,17,MIL,Milwaukee Bucks,120,34,26,27,33,,,,2,False,10,GSW,Golden State Warriors,110,25,33,26,26,,,,1,True
+18446889,2025-10-30,2025-10-31T00:00:00.000Z,2025,Final,4,Final,False,False,,21,OKC,Oklahoma City Thunder,127,28,31,33,35,,,,2,True,30,WAS,Washington Wizards,108,20,29,35,24,,,,2,False
+18446890,2025-10-30,2025-10-31T00:30:00.000Z,2025,Final,4,Final,False,False,,27,SAS,San Antonio Spurs,107,33,26,28,20,,,,2,False,16,MIA,Miami Heat,101,31,27,14,29,,,,1,True
+18446891,2025-10-31,2025-10-31T23:00:00.000Z,2025,Final,4,Final,False,False,East Group A,12,IND,Indiana Pacers,108,29,30,17,32,,,,0,True,1,ATL,Atlanta Hawks,128,32,31,34,31,,,,2,False
+18446892,2025-10-31,2025-10-31T23:00:00.000Z,2025,Final,4,Final,False,False,East Group B,23,PHI,Philadelphia 76ers,108,25,32,25,26,,,,0,False,2,BOS,Boston Celtics,109,38,30,21,20,,,,0,True
+18446893,2025-10-31,2025-10-31T23:30:00.000Z,2025,Final,4,Final,False,False,East Group A,6,CLE,Cleveland Cavaliers,101,22,21,34,24,,,,1,False,28,TOR,Toronto Raptors,112,30,18,33,31,,,,1,True
+18446894,2025-10-31,2025-11-01T00:00:00.000Z,2025,Final,4,Final,False,False,East Group C,5,CHI,Chicago Bulls,135,35,37,28,35,,,,1,True,20,NYK,New York Knicks,125,27,26,38,34,,,,1,True
+18446895,2025-10-31,2025-11-01T01:30:00.000Z,2025,Final,4,Final,False,False,West Group B,15,MEM,Memphis Grizzlies,112,27,42,22,21,,,,1,False,14,LAL,Los Angeles Lakers,117,31,24,34,28,,,,2,True
+18446896,2025-10-31,2025-11-01T02:00:00.000Z,2025,Final,4,Final,False,False,West Group A,24,PHX,Phoenix Suns,118,37,17,29,35,,,,1,True,29,UTA,Utah Jazz,96,17,23,27,29,,,,2,True
+18446897,2025-10-31,2025-11-01T02:00:00.000Z,2025,Final,4,Final,False,False,West Group C,25,POR,Portland Trail Blazers,109,18,35,18,38,,,,2,True,8,DEN,Denver Nuggets,107,26,31,24,26,,,,0,False
+18446898,2025-10-31,2025-11-01T02:30:00.000Z,2025,Final,4,Final,False,False,West Group B,13,LAC,LA Clippers,126,26,41,27,32,,,,0,True,19,NOP,New Orleans Pelicans,124,28,31,25,40,,,,1,True
