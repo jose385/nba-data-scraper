@@ -1,341 +1,445 @@
-# NBA Betting Analysis - BallDontLie API Edition
+# NBA Data Scraper
 
-🏀 **Clean, simple, and reliable NBA data collection using BallDontLie API**
-
-## Why BallDontLie?
-
-### Problems with Previous Approach:
-- ❌ `nba_api` (stats.nba.com) - Frequent timeouts, Cloudflare blocking, complex rate limiting
-- ❌ ESPN API - Inconsistent data format, limited endpoints
-- ❌ Complex multi-source fallback system - Maintenance nightmare
-
-### Benefits of BallDontLie:
-- ✅ **Simple REST API** - Easy to use, well-documented
-- ✅ **Reliable** - No Cloudflare blocking, consistent uptime
-- ✅ **Clear rate limits** - 30 req/min free, 60 with API key
-- ✅ **Good enough data** - Perfect for betting analysis
-- ✅ **One clean source** - No complex fallback logic needed
-
-## What You Get
-
-### From BallDontLie API (Automated Collection):
-- ✅ **Games**: Schedule, scores, final results, periods
-- ✅ **Box Scores**: All traditional player stats (pts, reb, ast, fg%, 3pt%, etc.)
-- ✅ **Teams**: All 30 NBA teams with conference/division
-- ✅ **Season Averages**: Player season statistics
-
-### From Claude (Contextual Research):
-- 🔍 **Injury Reports**: Latest player status and return timelines
-- 📋 **Starting Lineups**: Confirmed lineups before games
-- 👔 **Referee Assignments**: Officials and their tendencies
-- 📊 **Recent Trends**: Hot/cold streaks, matchup history
-- 💰 **Betting Lines**: Current odds and line movements
-- 🎯 **Betting Insights**: Analysis and recommendations
-
-**This division is perfect**: You collect the hard-to-get stats, Claude researches the context!
-
-## Quick Start
-
-### 1. Install Dependencies
-```bash
-pip install -r requirements_balldontlie.txt
-```
-
-Or minimal install:
-```bash
-pip install pandas pyarrow numpy requests psycopg2-binary python-dotenv
-```
-
-### 2. Get API Key (Optional but Recommended)
-```bash
-# Go to: https://www.balldontlie.io/
-# Sign up (free)
-# Copy your API key
-# Add to .env:
-echo "BALLDONTLIE_API_KEY=your_key_here" >> .env
-```
-
-**Free tier**: 30 requests/minute (no key needed)  
-**With key**: 60 requests/minute
-
-### 3. Test the API Client
-```bash
-python py/nba_balldontlie_client.py
-```
-
-This will:
-- Test API connectivity
-- Fetch teams
-- Get recent games
-- Retrieve box scores
-
-### 4. Collect Historical Data
-```bash
-# Collect specific date
-python py/nba_balldontlie_backfill.py \
-  --start 2024-11-13 \
-  --end 2024-11-13
-
-# Collect date range
-python py/nba_balldontlie_backfill.py \
-  --start 2024-11-01 \
-  --end 2024-11-13
-
-# With API key (faster)
-python py/nba_balldontlie_backfill.py \
-  --start 2024-11-13 \
-  --end 2024-11-13 \
-  --api-key your_key_here
-```
-
-### 5. Check Your Data
-```bash
-ls stage/
-# You'll see:
-# - nba_games_2024-11-13.parquet
-# - nba_box_scores_2024-11-13.parquet
-# - nba_complete_2024-11-13.parquet (combined file)
-```
-
-### 6. View Data (Convert to CSV)
-```bash
-python convert_parquet_to_csv.py --input-dir stage
-```
-
-### 7. Setup Database (Optional)
-```bash
-# Configure database
-cp .env.nba.template .env
-# Edit .env with your PostgreSQL connection
-
-# Run schema migration
-psql -U your_user -d your_database -f migrations/002_nba_balldontlie_schema.sql
-
-# Load data
-python loader/nba_load_balldontlie_data.py --input-dir stage
-```
-
-## Data Structure
-
-### Games (`nba_games_YYYY-MM-DD.parquet`)
-```
-Columns:
-- id, date, season, status
-- home_team_id, home_team_name, home_team_abbrev, home_team_score
-- away_team_id, away_team_name, away_team_abbrev, away_team_score
-- period, time, postseason
-```
-
-### Box Scores (`nba_box_scores_YYYY-MM-DD.parquet`)
-```
-Columns:
-- game_id, player_id, team_id
-- player_first_name, player_last_name, player_position
-- minutes_played (decimal)
-- Field Goals: fgm, fga, fg_pct
-- Three Pointers: fg3m, fg3a, fg3_pct
-- Free Throws: ftm, fta, ft_pct
-- Rebounds: oreb, dreb, reb
-- Other: ast, stl, blk, turnover, pf, pts
-```
-
-### Combined (`nba_complete_YYYY-MM-DD.parquet`)
-Complete dataset with games + box scores merged - ready for analysis!
-
-## Usage Examples
-
-### Collect Last Week's Games
-```bash
-python py/nba_balldontlie_backfill.py \
-  --start $(date -d '7 days ago' +%Y-%m-%d) \
-  --end $(date +%Y-%m-%d)
-```
-
-### Collect Season Opening Week
-```bash
-python py/nba_balldontlie_backfill.py \
-  --start 2024-10-22 \
-  --end 2024-10-29 \
-  --season 2024
-```
-
-### Daily Automated Collection (Cron)
-```bash
-# Add to crontab for daily 6 AM collection
-0 6 * * * cd /path/to/nba && python py/nba_balldontlie_backfill.py --start $(date -d '1 day ago' +\%Y-\%m-\%d) --end $(date -d '1 day ago' +\%Y-\%m-\%d)
-```
-
-## Rate Limiting
-
-BallDontLie has clear, simple rate limits:
-- **Free**: 30 requests/minute (2 second delay)
-- **With API Key**: 60 requests/minute (1 second delay)
-
-Our client automatically handles rate limiting with smart delays.
-
-### Typical Collection Times:
-- **Single date**: 30-60 seconds (3-5 API calls)
-- **One week**: 3-5 minutes (20-30 API calls)
-- **One month**: 10-15 minutes (80-120 API calls)
-
-Much faster and more reliable than `nba_api`!
-
-## Claude Integration Workflow
-
-### 1. Morning: Collect Yesterday's Data
-```bash
-python py/nba_balldontlie_backfill.py \
-  --start $(date -d '1 day ago' +%Y-%m-%d) \
-  --end $(date -d '1 day ago' +%Y-%m-%d)
-```
-
-### 2. Analyze with Claude
-```
-"Here's yesterday's NBA data [attach CSV]. 
-
-For tonight's games:
-1. Research injury reports
-2. Check probable starting lineups
-3. Find referee assignments
-4. Analyze recent form and trends
-5. Recommend betting opportunities"
-```
-
-### 3. Claude Provides:
-- 🏥 Injury updates (e.g., "LeBron questionable with ankle")
-- 📋 Confirmed lineups (e.g., "Curry starting at PG")
-- 👔 Refs (e.g., "Scott Foster reffing - expect tight game")
-- 📊 Trends (e.g., "Lakers 7-2 ATS in last 9 games")
-- 💰 Bets (e.g., "Lakers -5.5, Over 225.5, LeBron O25.5 pts")
-
-## Project Structure
-
-```
-nba/
-├── py/
-│   ├── nba_balldontlie_client.py       # API client
-│   ├── nba_balldontlie_backfill.py     # Data collection script
-│   └── nba_config.py                    # Configuration
-├── migrations/
-│   └── 002_nba_balldontlie_schema.sql  # Database schema
-├── stage/                               # Parquet data files
-├── loader/                              # Database loading scripts
-├── requirements_balldontlie.txt         # Python dependencies
-└── README_BALLDONTLIE.md               # This file
-```
-
-## Advantages Over Previous System
-
-| Feature | Old (nba_api) | New (BallDontLie) |
-|---------|---------------|-------------------|
-| **Reliability** | ❌ Frequent timeouts | ✅ Very reliable |
-| **Setup** | ❌ Complex (3 APIs) | ✅ Simple (1 API) |
-| **Rate Limits** | ❌ Unclear, strict | ✅ Clear, reasonable |
-| **Code** | ❌ 1000+ lines | ✅ 300 lines |
-| **Maintenance** | ❌ High | ✅ Low |
-| **Data Quality** | ✅ Excellent | ✅ Good enough |
-| **API Key** | ❌ Not available | ✅ Free tier available |
-
-## What Data is Missing?
-
-BallDontLie doesn't provide:
-- ❌ Play-by-play data
-- ❌ Shot charts with locations
-- ❌ Advanced tracking (speed, distance)
-- ❌ Real-time live data
-
-**But that's OK!** These are rarely needed for betting analysis, and if you need them, you can:
-1. Use Claude to research specific plays
-2. Manually check NBA.com for shot charts
-3. Focus on what matters: box scores and trends
-
-## Database Schema
-
-Simple, focused schema with 4 main tables:
-
-1. **nba_teams** - Team reference data (30 teams)
-2. **nba_games** - Daily game results
-3. **nba_box_scores** - Player stats per game
-4. **nba_season_averages** - Player season stats
-
-Plus helpful views:
-- `recent_player_performance` - Last 10 days
-- `game_scoring_trends` - Daily totals
-- `team_performance` - Win/loss records
-
-## Troubleshooting
-
-### "Rate limit exceeded"
-```bash
-# Wait 60 seconds and retry
-# Or get API key for higher limits
-```
-
-### "No games found"
-```bash
-# Check if date is during NBA season (Oct-June)
-# Off-season = no games
-# Use --season flag to verify: --season 2024
-```
-
-### "API key not working"
-```bash
-# Verify key in .env:
-cat .env | grep BALLDONTLIE_API_KEY
-
-# Pass directly to script:
-python py/nba_balldontlie_backfill.py --api-key YOUR_KEY --start ...
-```
-
-### "Data looks empty"
-```bash
-# BallDontLie updates ~2 hours after games end
-# Wait a bit after games finish
-# Check status column: should be "Final"
-```
-
-## FAQ
-
-**Q: Is BallDontLie free?**  
-A: Yes! Free tier gives 30 requests/minute. Optional paid tiers for higher limits.
-
-**Q: Do I need an API key?**  
-A: No, but recommended. Increases rate limit from 30 to 60 req/min.
-
-**Q: How recent is the data?**  
-A: Updates within 1-2 hours after games end. Good for next-day analysis.
-
-**Q: Can I get live game data?**  
-A: Not with BallDontLie. Use official NBA sources for live scores.
-
-**Q: What about advanced stats (PER, True Shooting%, etc.)?**  
-A: Calculate these from the traditional stats, or use Claude to analyze.
-
-**Q: Can I get historical data?**  
-A: Yes! BallDontLie has data back to ~2010. Just specify date range.
-
-**Q: What's the best way to use this for betting?**  
-A: 
-1. Collect yesterday's games every morning
-2. Feed to Claude with today's matchups
-3. Claude researches context (injuries, trends, refs)
-4. Get betting recommendations
-5. Profit! 💰
-
-## Support
-
-- **BallDontLie Docs**: https://docs.balldontlie.io/
-- **API Status**: Check https://www.balldontlie.io/ for any issues
-- **Get API Key**: https://www.balldontlie.io/
-
-## Next Steps
-
-1. ✅ Test API connection: `python py/nba_balldontlie_client.py`
-2. ✅ Collect sample data: `python py/nba_balldontlie_backfill.py --start 2024-11-13 --end 2024-11-13`
-3. ✅ View the data: `ls stage/` and convert to CSV
-4. ✅ Send to Claude for analysis
-5. ✅ Start making informed bets!
+Comprehensive NBA data collection system using BallDontLie API (GOAT tier). Collects games, box scores, player stats, advanced metrics, and possession/stint data for betting analysis and prediction models.
 
 ---
 
-**Much simpler. Much more reliable. Perfect for betting analysis.** 🏀📊💰
+## Quick Start
+
+```bash
+# 1. Install dependencies
+pip install requests pandas
+# Optional: pip install pyarrow  (for parquet files from other scripts)
+
+# 2. Set API key
+export BALLDONTLIE_API_KEY="your-api-key"
+
+# 3. Run collection
+python py/nba_balldontlie_backfill.py --start 2025-10-22 --end 2025-10-31
+```
+
+---
+
+## Scripts Overview
+
+| Script | Purpose | Data Collected |
+|--------|---------|----------------|
+| `py/nba_balldontlie_client.py` | API client | Core BDL API wrapper |
+| `py/nba_balldontlie_backfill.py` | Main collector | Games, box scores, teams |
+| `py/premium_nba_collection.py` | Premium collector | Advanced stats, standings, injuries |
+| `nba_bdl_possessions.py` | Stints/possessions | Play-by-play derived data |
+
+---
+
+## 1. Main Data Collection (`nba_balldontlie_backfill.py`)
+
+Collects core NBA data: games, box scores, and team information.
+
+### Basic Usage
+
+```bash
+# Collect games for a date range
+python py/nba_balldontlie_backfill.py \
+    --start 2025-10-22 \
+    --end 2025-11-30
+
+# Collect single day
+python py/nba_balldontlie_backfill.py \
+    --start 2025-11-15 \
+    --end 2025-11-15
+
+# Full collection (teams + games + box scores)
+python py/nba_balldontlie_backfill.py \
+    --start 2025-10-22 \
+    --end 2025-12-31 \
+    --full
+
+# Collect only teams
+python py/nba_balldontlie_backfill.py --teams-only
+
+# Specify output directory
+python py/nba_balldontlie_backfill.py \
+    --start 2025-11-01 \
+    --end 2025-11-30 \
+    --output ./data
+```
+
+### Output Files
+
+```
+stage/
+├── nba_teams.parquet
+├── nba_games_2025-11-15.parquet
+├── nba_box_scores_2025-11-15.parquet
+└── collection_summary_YYYY-MM-DD.json
+```
+
+---
+
+## 2. Premium Collection (`premium_nba_collection.py`)
+
+Collects premium/GOAT tier data including advanced stats, standings, and injuries.
+
+### Basic Usage
+
+```bash
+# Standard premium collection
+python premium_nba_collection.py \
+    --start 2025-11-01 \
+    --end 2025-11-15
+
+# Betting-focused collection (includes odds if available)
+python premium_nba_collection.py \
+    --start 2025-11-15 \
+    --end 2025-11-15 \
+    --betting-focus
+
+# Full premium collection
+python premium_nba_collection.py \
+    --start 2025-10-22 \
+    --end 2025-12-31 \
+    --full
+```
+
+### Premium Data Endpoints
+
+| Endpoint | Description | Availability |
+|----------|-------------|--------------|
+| Teams | All NBA teams | ✅ All tiers |
+| Players | Player info | ✅ All tiers |
+| Games | Schedule & scores | ✅ All tiers |
+| Box Scores | Player game stats | ✅ All tiers |
+| Advanced Stats | PER, TS%, etc. | ✅ GOAT tier |
+| Standings | Conference/division | ✅ GOAT tier |
+| Player Injuries | Injury reports | ✅ GOAT tier |
+| Season Averages | Player season stats | ✅ GOAT tier |
+| League Leaders | Statistical leaders | ✅ GOAT tier |
+| Play-by-Play | Game events | ✅ GOAT tier (2025+) |
+| Lineups | Starting lineups | ✅ GOAT tier (2025+) |
+| Betting Odds | Sportsbook lines | ✅ GOAT tier (2025+) |
+
+---
+
+## 3. Stints/Possessions Collection (`nba_bdl_possessions.py`)
+
+Computes possession and stint data from play-by-play for advanced analytics.
+
+### Basic Usage
+
+```bash
+# Full season backfill
+python nba_bdl_possessions.py backfill --season 2025
+
+# Yesterday's games
+python nba_bdl_possessions.py daily
+
+# Today's games  
+python nba_bdl_possessions.py today
+```
+
+### Filter by Dates
+
+```bash
+# Date range
+python nba_bdl_possessions.py backfill \
+    --start-date 2026-01-01 \
+    --end-date 2026-01-15
+
+# Specific dates
+python nba_bdl_possessions.py backfill \
+    --dates 2026-01-15 2026-01-16 2026-01-17
+
+# Single date
+python nba_bdl_possessions.py backfill --dates 2026-01-20
+```
+
+### Filter by Teams
+
+```bash
+# Single team (all their games)
+python nba_bdl_possessions.py backfill --teams LAL
+
+# Multiple teams
+python nba_bdl_possessions.py backfill --teams LAL BOS GSW
+
+# Team games in date range
+python nba_bdl_possessions.py backfill \
+    --teams LAL \
+    --start-date 2026-01-01 \
+    --end-date 2026-01-31
+```
+
+### Combined Filters
+
+```bash
+# Lakers and Celtics games on specific dates
+python nba_bdl_possessions.py backfill \
+    --teams LAL BOS \
+    --dates 2026-01-15 2026-01-20
+
+# Warriors January games
+python nba_bdl_possessions.py backfill \
+    --teams GSW \
+    --start-date 2026-01-01 \
+    --end-date 2026-01-31
+
+# Today's Lakers game
+python nba_bdl_possessions.py today --teams LAL
+
+# Yesterday's games for multiple teams
+python nba_bdl_possessions.py daily --teams LAL BOS GSW
+```
+
+### Output Type
+
+```bash
+# Stints (default) - segments between substitutions
+python nba_bdl_possessions.py backfill --output stints
+
+# Possessions - individual possession tracking
+python nba_bdl_possessions.py backfill --output possessions
+```
+
+### Other Options
+
+```bash
+# Re-process existing games (don't skip)
+python nba_bdl_possessions.py backfill --no-skip
+
+# Verbose logging
+python nba_bdl_possessions.py backfill --verbose
+
+# Specify season
+python nba_bdl_possessions.py backfill --season 2024
+```
+
+### Stints Output Schema
+
+| Column | Type | Description |
+|--------|------|-------------|
+| game_id | int | BallDontLie game ID |
+| stint_num | int | Sequential stint number |
+| period | int | Period (1-4, 5+ for OT) |
+| start_clock | str | Start time (MM:SS) |
+| end_clock | str | End time (MM:SS) |
+| possessions | int | Number of possessions |
+| home_points | int | Home team points |
+| away_points | int | Away team points |
+| start_margin | int | Score differential at start |
+| end_margin | int | Score differential at end |
+
+---
+
+## 4. API Client (`nba_balldontlie_client.py`)
+
+Low-level API client for custom data collection.
+
+### Usage in Python
+
+```python
+from py.nba_balldontlie_client import create_client
+
+# Initialize client
+client = create_client()  # Uses BALLDONTLIE_API_KEY env var
+
+# Get teams
+teams = client.get_teams()
+
+# Get games for date range
+games = client.get_games(
+    start_date="2025-11-01",
+    end_date="2025-11-15",
+    seasons=[2025]
+)
+
+# Get box scores for a game
+stats = client.get_game_stats(game_id=18446850)
+
+# Get season averages
+averages = client.get_season_averages(
+    season=2025,
+    player_ids=[1, 2, 3]
+)
+
+# Get standings
+standings = client.get_standings(season=2025)
+
+# Get player injuries
+injuries = client.get_injuries()
+
+# Get advanced stats
+advanced = client.get_advanced_stats(
+    season=2025,
+    player_ids=[1, 2, 3]
+)
+```
+
+---
+
+## Team Abbreviations
+
+| Team | Code | Team | Code |
+|------|------|------|------|
+| Atlanta Hawks | ATL | Milwaukee Bucks | MIL |
+| Boston Celtics | BOS | Minnesota Timberwolves | MIN |
+| Brooklyn Nets | BKN | New Orleans Pelicans | NOP |
+| Charlotte Hornets | CHA | New York Knicks | NYK |
+| Chicago Bulls | CHI | Oklahoma City Thunder | OKC |
+| Cleveland Cavaliers | CLE | Orlando Magic | ORL |
+| Dallas Mavericks | DAL | Philadelphia 76ers | PHI |
+| Denver Nuggets | DEN | Phoenix Suns | PHX |
+| Detroit Pistons | DET | Portland Trail Blazers | POR |
+| Golden State Warriors | GSW | Sacramento Kings | SAC |
+| Houston Rockets | HOU | San Antonio Spurs | SAS |
+| Indiana Pacers | IND | Toronto Raptors | TOR |
+| LA Clippers | LAC | Utah Jazz | UTA |
+| Los Angeles Lakers | LAL | Washington Wizards | WAS |
+| Memphis Grizzlies | MEM | Miami Heat | MIA |
+
+---
+
+## Directory Structure
+
+```
+nba-data-scraper/
+├── py/
+│   ├── nba_balldontlie_client.py    # API client
+│   ├── nba_balldontlie_backfill.py  # Main collector
+│   └── nba_config.py                # Configuration
+├── nba_bdl_possessions.py           # Stints/possessions collector
+├── premium_nba_collection.py        # Premium data collector
+├── loader/
+│   └── nba_load_data.py             # PostgreSQL loader
+├── migrations/
+│   └── 001_nba_schema.sql           # Database schema
+├── stage/                           # Daily data output
+│   ├── nba_games_YYYY-MM-DD.parquet
+│   └── nba_box_scores_YYYY-MM-DD.parquet
+├── nba_stints_data/                 # Stints output
+│   ├── stints/
+│   │   └── YYYY-MM_stints.csv
+│   └── logs/
+├── .env                             # API key (not in git)
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Common Workflows
+
+### Daily Data Collection (Cron)
+
+```bash
+# Add to crontab - runs at 6 AM daily
+0 6 * * * cd /path/to/nba-data-scraper && \
+    python py/nba_balldontlie_backfill.py --start $(date -d "yesterday" +%Y-%m-%d) --end $(date -d "yesterday" +%Y-%m-%d) && \
+    python nba_bdl_possessions.py daily \
+    >> /var/log/nba_collector.log 2>&1
+```
+
+### Backfill Full Season
+
+```bash
+# Collect all 2025-26 season data
+python py/nba_balldontlie_backfill.py \
+    --start 2025-10-22 \
+    --end 2026-04-15 \
+    --full
+
+python nba_bdl_possessions.py backfill --season 2025
+```
+
+### Pre-Game Data Collection
+
+```bash
+# Collect today's matchup data for betting analysis
+python nba_bdl_possessions.py backfill --teams LAL BOS --season 2025
+python premium_nba_collection.py --start $(date +%Y-%m-%d) --end $(date +%Y-%m-%d) --betting-focus
+```
+
+---
+
+## Reading Data in Python
+
+```python
+import pandas as pd
+from pathlib import Path
+
+# Load games
+games = pd.read_parquet("stage/nba_games_2025-11-15.parquet")
+
+# Load box scores
+box_scores = pd.read_parquet("stage/nba_box_scores_2025-11-15.parquet")
+
+# Load all stints (CSV files)
+stints_dir = Path("nba_stints_data/stints")
+all_stints = pd.concat([
+    pd.read_csv(f) for f in stints_dir.glob("*_stints.csv")
+])
+
+# Filter to specific team
+lakers_games = games[
+    (games["home_team_abbrev"] == "LAL") | 
+    (games["away_team_abbrev"] == "LAL")
+]
+
+# Join box scores with games
+merged = box_scores.merge(games, on="game_id")
+```
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BALLDONTLIE_API_KEY` | Yes | BallDontLie API key |
+| `DATABASE_URL` | No | PostgreSQL connection string |
+
+---
+
+## Troubleshooting
+
+### "API key required"
+```bash
+export BALLDONTLIE_API_KEY="your-key-here"
+```
+
+### 404 errors on play-by-play
+- Play-by-play requires GOAT tier
+- Only available for 2025+ season games
+- Game must be completed (Final status)
+
+### Rate limiting
+- Free tier: 30 requests/minute
+- GOAT tier: 600 requests/minute
+- Scripts include automatic delays
+
+### No games found
+- Check date format: `YYYY-MM-DD`
+- Verify season matches dates
+- NBA season runs October to April
+
+---
+
+## API Tiers
+
+| Feature | Free | ALL-STAR | GOAT |
+|---------|------|----------|------|
+| Rate Limit | 30/min | 300/min | 600/min |
+| Teams/Players/Games | ✅ | ✅ | ✅ |
+| Box Scores | ✅ | ✅ | ✅ |
+| Season Averages | ❌ | ✅ | ✅ |
+| Advanced Stats | ❌ | ✅ | ✅ |
+| Standings | ❌ | ✅ | ✅ |
+| Injuries | ❌ | ✅ | ✅ |
+| Play-by-Play | ❌ | ❌ | ✅ |
+| Lineups | ❌ | ❌ | ✅ |
+| Betting Odds | ❌ | ❌ | ✅ |
+
+---
+
+## License
+
+MIT
