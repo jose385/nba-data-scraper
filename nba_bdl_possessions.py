@@ -537,18 +537,25 @@ def parse_time(time_str: str) -> float:
 # Storage
 # =============================================================================
 
-def get_month_shard_path(game_date: str, output_type: str = "stints") -> Path:
+def get_month_shard_path(game_date: str, output_type: str = "stints", teams: Optional[list[str]] = None) -> Path:
     dt = datetime.strptime(game_date, "%Y-%m-%d")
-    filename = f"{dt.year}-{dt.month:02d}_{output_type}.csv"
+    
+    if teams:
+        # Sort teams alphabetically for consistent filenames
+        teams_str = "_".join(sorted([t.upper() for t in teams]))
+        filename = f"{dt.year}-{dt.month:02d}_{teams_str}_{output_type}.csv"
+    else:
+        filename = f"{dt.year}-{dt.month:02d}_{output_type}.csv"
+    
     return POSSESSIONS_DIR / filename
 
 
-def save_stints(data: list[dict], game_date: str, game_id: int, logger: logging.Logger):
+def save_stints(data: list[dict], game_date: str, game_id: int, logger: logging.Logger, teams: Optional[list[str]] = None):
     """Save stints to monthly shard."""
     if not data:
         return
     
-    shard_path = get_month_shard_path(game_date, "stints")
+    shard_path = get_month_shard_path(game_date, "stints", teams)
     
     # Flatten stints for storage
     flat_data = []
@@ -599,11 +606,11 @@ def save_stints(data: list[dict], game_date: str, game_id: int, logger: logging.
     logger.debug(f"Saved {len(new_df)} stints to {shard_path}")
 
 
-def save_possessions(data: list[dict], game_date: str, game_id: int, logger: logging.Logger):
+def save_possessions(data: list[dict], game_date: str, game_id: int, logger: logging.Logger, teams: Optional[list[str]] = None):
     if not data:
         return
     
-    shard_path = get_month_shard_path(game_date, "possessions")
+    shard_path = get_month_shard_path(game_date, "possessions", teams)
     
     # Flatten possessions (remove events list for storage)
     flat_data = []
@@ -633,9 +640,15 @@ def save_possessions(data: list[dict], game_date: str, game_id: int, logger: log
     logger.debug(f"Saved {len(new_df)} possessions to {shard_path}")
 
 
-def load_processed_games(output_type: str = "stints") -> set[int]:
+def load_processed_games(output_type: str = "stints", teams: Optional[list[str]] = None) -> set[int]:
     processed = set()
-    pattern = f"*_{output_type}.csv"
+    
+    if teams:
+        teams_str = "_".join(sorted([t.upper() for t in teams]))
+        pattern = f"*_{teams_str}_{output_type}.csv"
+    else:
+        pattern = f"*_{output_type}.csv"
+    
     for shard_file in POSSESSIONS_DIR.glob(pattern):
         try:
             df = pd.read_csv(shard_file, usecols=["game_id"])
@@ -686,7 +699,7 @@ def run_backfill(
         return
     
     if skip_existing:
-        processed = load_processed_games(output_type)
+        processed = load_processed_games(output_type, teams)
         original_count = len(games)
         games = [g for g in games if g["game_id"] not in processed]
         logger.info(f"Skipping {original_count - len(games)} already processed games")
@@ -724,7 +737,7 @@ def run_backfill(
                 )
                 
                 if stints:
-                    save_stints(stints, game_date, game_id, logger)
+                    save_stints(stints, game_date, game_id, logger, teams)
                     has_lineups = any(s.get("home_lineup_ids") for s in stints)
                     logger.info(f"  Got {len(stints)} stints (lineups: {'yes' if has_lineups else 'no'})")
                     if not has_lineups:
@@ -742,7 +755,7 @@ def run_backfill(
                 )
                 
                 if possessions:
-                    save_possessions(possessions, game_date, game_id, logger)
+                    save_possessions(possessions, game_date, game_id, logger, teams)
                     logger.info(f"  Got {len(possessions)} possessions")
                     stats["success"] += 1
                 else:
