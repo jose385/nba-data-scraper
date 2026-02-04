@@ -1,0 +1,49 @@
+game_id,date,datetime,season,status,period,time,postseason,postponed,ist_stage,home_team_id,home_team_abbr,home_team_name,home_score,home_q1,home_q2,home_q3,home_q4,home_ot1,home_ot2,home_ot3,home_timeouts,home_in_bonus,visitor_team_id,visitor_team_abbr,visitor_team_name,visitor_score,visitor_q1,visitor_q2,visitor_q3,visitor_q4,visitor_ot1,visitor_ot2,visitor_ot3,visitor_timeouts,visitor_in_bonus
+18446826,2025-10-22,2025-10-22T23:30:00.000Z,2025,Final,4,Final,False,False,,2,BOS,Boston Celtics,116,28,23,35,30,,,,0,True,23,PHI,Philadelphia 76ers,117,26,31,18,42,,,,0,True
+18446849,2025-10-25,2025-10-25T23:30:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,125,36,25,25,39,,,,1,True,4,CHA,Charlotte Hornets,121,29,29,38,25,,,,0,True
+18446863,2025-10-27,2025-10-27T23:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,136,33,39,29,35,,,,1,True,22,ORL,Orlando Magic,124,28,32,34,30,,,,1,True
+18446872,2025-10-28,2025-10-28T23:00:00.000Z,2025,Final,5,Final,False,False,,30,WAS,Washington Wizards,134,40,32,38,16,8.0,,,0,False,23,PHI,Philadelphia 76ers,139,32,36,26,32,13.0,,,1,True
+18446892,2025-10-31,2025-10-31T23:00:00.000Z,2025,Final,4,Final,False,False,East Group B,23,PHI,Philadelphia 76ers,108,25,32,25,26,,,,0,False,2,BOS,Boston Celtics,109,38,30,21,20,,,,0,True
+18446906,2025-11-02,2025-11-02T23:00:00.000Z,2025,Final,4,Final,False,False,,3,BKN,Brooklyn Nets,105,37,18,23,27,,,,2,True,23,PHI,Philadelphia 76ers,129,40,33,17,39,,,,2,False
+18446924,2025-11-04,2025-11-05T01:00:00.000Z,2025,Final,4,Final,False,False,,5,CHI,Chicago Bulls,113,27,29,28,29,,,,1,True,23,PHI,Philadelphia 76ers,111,45,30,20,16,,,,0,True
+18446928,2025-11-05,2025-11-06T00:00:00.000Z,2025,Final,4,Final,False,False,,6,CLE,Cleveland Cavaliers,132,41,29,37,25,,,,2,True,23,PHI,Philadelphia 76ers,121,27,40,20,34,,,,1,True
+18446952,2025-11-08,2025-11-09T00:30:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,130,33,35,33,29,,,,2,True,28,TOR,Toronto Raptors,120,43,20,34,23,,,,1,False
+18446963,2025-11-09,2025-11-10T00:30:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,108,32,32,21,23,,,,1,True,9,DET,Detroit Pistons,111,37,17,34,23,,,,2,True
+18446977,2025-11-11,2025-11-12T01:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,102,23,28,20,31,,,,1,False,2,BOS,Boston Celtics,100,22,19,36,23,,,,1,True
+18446998,2025-11-14,2025-11-15T00:30:00.000Z,2025,Final,4,Final,False,False,East Group B,9,DET,Detroit Pistons,114,28,35,25,26,,,,2,False,23,PHI,Philadelphia 76ers,105,27,27,36,15,,,,1,False
+18447020,2025-11-17,2025-11-18T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,110,25,21,27,37,,,,2,True,13,LAC,LA Clippers,108,33,23,27,25,,,,1,True
+18447035,2025-11-19,2025-11-20T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,112,28,28,26,30,,,,1,True,28,TOR,Toronto Raptors,121,33,20,44,24,,,,2,False
+18447043,2025-11-20,2025-11-21T01:00:00.000Z,2025,Final,5,Final,False,False,,17,MIL,Milwaukee Bucks,114,20,37,24,25,8.0,,,1,False,23,PHI,Philadelphia 76ers,123,33,22,22,29,17.0,,,2,True
+18447061,2025-11-23,2025-11-23T18:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,117,27,40,26,24,,,,2,True,16,MIA,Miami Heat,127,37,34,28,28,,,,2,False
+18447080,2025-11-25,2025-11-26T01:00:00.000Z,2025,Final,4,Final,False,False,East Group B,23,PHI,Philadelphia 76ers,103,35,25,23,20,,,,2,False,22,ORL,Orlando Magic,144,35,51,35,23,,,,2,True
+18447092,2025-11-28,2025-11-29T00:30:00.000Z,2025,Final,4,Final,False,False,East Group B,3,BKN,Brooklyn Nets,103,23,25,27,28,,,,2,False,23,PHI,Philadelphia 76ers,115,31,32,24,28,,,,1,False
+18447113,2025-11-30,2025-11-30T23:00:00.000Z,2025,Final,6,Final,False,False,,23,PHI,Philadelphia 76ers,134,29,29,31,26,11.0,8.0,,1,False,1,ATL,Atlanta Hawks,142,25,32,26,32,11.0,16.0,,0,True
+18447127,2025-12-02,2025-12-03T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,121,34,32,35,20,,,,2,False,30,WAS,Washington Wizards,102,31,23,23,25,,,,1,False
+18447142,2025-12-04,2025-12-05T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,99,30,26,24,19,,,,0,True,10,GSW,Golden State Warriors,98,10,24,32,32,,,,0,False
+18447157,2025-12-05,2025-12-06T01:00:00.000Z,2025,Final,4,Final,False,False,,17,MIL,Milwaukee Bucks,101,20,29,28,24,,,,2,True,23,PHI,Philadelphia 76ers,116,33,36,24,23,,,,2,True
+18447171,2025-12-07,2025-12-08T00:30:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,108,30,30,24,24,,,,0,True,14,LAL,Los Angeles Lakers,112,30,23,34,25,,,,1,True
+20054964,2025-12-12,2025-12-13T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,115,34,29,27,25,,,,2,True,12,IND,Indiana Pacers,105,31,27,32,15,,,,1,False
+20054970,2025-12-14,2025-12-14T23:00:00.000Z,2025,Final,4,Final,False,False,,1,ATL,Atlanta Hawks,120,39,20,35,26,,,,0,True,23,PHI,Philadelphia 76ers,117,29,26,36,26,,,,1,False
+18447191,2025-12-19,2025-12-20T00:00:00.000Z,2025,Final,4,Final,False,False,,20,NYK,New York Knicks,107,29,30,28,20,,,,1,False,23,PHI,Philadelphia 76ers,116,29,28,31,28,,,,2,False
+18447196,2025-12-20,2025-12-21T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,121,38,30,23,30,,,,2,True,7,DAL,Dallas Mavericks,114,33,29,35,17,,,,1,False
+18447219,2025-12-23,2025-12-24T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,106,27,30,20,29,,,,1,True,3,BKN,Brooklyn Nets,114,27,36,26,25,,,,2,True
+18447241,2025-12-26,2025-12-27T00:30:00.000Z,2025,Final,4,Final,False,False,,5,CHI,Chicago Bulls,109,30,19,32,28,,,,1,True,23,PHI,Philadelphia 76ers,102,28,24,33,17,,,,1,True
+18447256,2025-12-28,2025-12-28T20:30:00.000Z,2025,Final,4,Final,False,False,,21,OKC,Oklahoma City Thunder,129,32,32,38,27,,,,2,False,23,PHI,Philadelphia 76ers,104,29,33,24,18,,,,2,True
+18447272,2025-12-30,2025-12-31T01:00:00.000Z,2025,Final,5,Final,False,False,,15,MEM,Memphis Grizzlies,136,40,32,28,28,8.0,,,1,False,23,PHI,Philadelphia 76ers,139,34,38,31,25,11.0,,,0,False
+18447287,2026-01-01,2026-01-02T01:30:00.000Z,2025,Final,4,Final,False,False,,7,DAL,Dallas Mavericks,108,33,24,26,25,,,,2,False,23,PHI,Philadelphia 76ers,123,27,41,24,31,,,,2,False
+18447301,2026-01-03,2026-01-04T00:30:00.000Z,2025,Final,4,Final,False,False,,20,NYK,New York Knicks,119,30,28,29,32,,,,3,True,23,PHI,Philadelphia 76ers,130,31,35,33,31,,,,2,True
+18447321,2026-01-05,2026-01-06T01:30:00.000Z,2025,Final,5,Final,False,False,,23,PHI,Philadelphia 76ers,124,26,32,35,27,4.0,,,2,False,8,DEN,Denver Nuggets,125,29,29,29,33,5.0,,,1,False
+18447332,2026-01-07,2026-01-08T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,131,37,25,30,39,,,,2,True,30,WAS,Washington Wizards,110,30,26,24,30,,,,1,False
+18447347,2026-01-09,2026-01-10T00:00:00.000Z,2025,Final,4,Final,False,False,,22,ORL,Orlando Magic,91,28,26,25,12,,,,2,True,23,PHI,Philadelphia 76ers,103,24,29,30,20,,,,2,False
+18447364,2026-01-11,2026-01-11T23:00:00.000Z,2025,Final,5,Final,False,False,,28,TOR,Toronto Raptors,116,22,36,18,31,9.0,,,0,True,23,PHI,Philadelphia 76ers,115,25,23,36,23,8.0,,,1,False
+18447374,2026-01-12,2026-01-13T00:30:00.000Z,2025,Final,4,Final,False,False,,28,TOR,Toronto Raptors,102,28,23,26,25,,,,2,True,23,PHI,Philadelphia 76ers,115,45,35,19,16,,,,1,True
+18447386,2026-01-14,2026-01-15T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,107,18,29,28,32,,,,2,True,6,CLE,Cleveland Cavaliers,133,33,27,33,40,,,,2,False
+18447403,2026-01-16,2026-01-17T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,115,31,31,29,24,,,,0,False,6,CLE,Cleveland Cavaliers,117,31,24,29,33,,,,0,False
+18447427,2026-01-19,2026-01-20T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,113,33,17,32,31,,,,2,True,12,IND,Indiana Pacers,104,30,25,26,23,,,,1,False
+18447431,2026-01-20,2026-01-21T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,110,30,23,31,26,,,,1,True,24,PHX,Phoenix Suns,116,27,30,40,19,,,,1,True
+18447446,2026-01-22,2026-01-23T00:00:00.000Z,2025,Final,5,Final,False,False,,23,PHI,Philadelphia 76ers,128,32,36,22,25,13.0,,,2,True,11,HOU,Houston Rockets,122,34,27,27,27,7.0,,,2,False
+18447461,2026-01-24,2026-01-24T20:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,109,34,30,13,32,,,,0,True,20,NYK,New York Knicks,112,34,26,30,22,,,,0,True
+18447475,2026-01-26,2026-01-26T20:00:00.000Z,2025,Final,4,Final,False,False,,4,CHA,Charlotte Hornets,130,28,41,40,21,,,,2,False,23,PHI,Philadelphia 76ers,93,22,22,15,34,,,,2,False
+18447484,2026-01-27,2026-01-28T01:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,139,42,29,35,33,,,,2,False,17,MIL,Milwaukee Bucks,122,34,28,33,27,,,,1,False
+18447498,2026-01-29,2026-01-30T00:00:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,113,28,32,28,25,,,,1,True,26,SAC,Sacramento Kings,111,25,29,38,19,,,,0,False
+18447517,2026-01-31,2026-02-01T00:30:00.000Z,2025,Final,4,Final,False,False,,23,PHI,Philadelphia 76ers,124,31,36,20,37,,,,1,True,19,NOP,New Orleans Pelicans,114,33,21,27,33,,,,0,True
