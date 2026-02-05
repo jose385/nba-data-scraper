@@ -6,7 +6,7 @@ Collects ALL available NBA data from BallDontLie API (GOAT tier)
 Supports team-specific filtering for faster, targeted collection.
 
 Author: Jose
-Last Updated: January 2026
+Last Updated: February 2026
 """
 
 import os
@@ -14,6 +14,7 @@ import time
 import argparse
 from datetime import datetime
 from typing import Optional, List, Dict
+from pathlib import Path
 
 import requests
 import pandas as pd
@@ -343,11 +344,17 @@ def flatten_stat(stat: Dict) -> Dict:
 
 
 def flatten_advanced_stat_v2(stat: Dict) -> Dict:
+    """Flatten advanced stat V2 record — captures ALL known API fields.
+    
+    Includes dynamic overflow capture so new API fields are never dropped.
+    Fields that the API doesn't return for certain date windows will be None,
+    which pd.concat handles correctly via column union + NaN fill.
+    """
     player = stat.get("player", {}) or {}
     team = stat.get("team", {}) or {}
     game = stat.get("game", {}) or {}
     
-    return {
+    flat = {
         "stat_id": stat.get("id"),
         "game_id": game.get("id"),
         "game_date": game.get("date"),
@@ -356,7 +363,7 @@ def flatten_advanced_stat_v2(stat: Dict) -> Dict:
         "team_id": team.get("id"),
         "team_abbr": team.get("abbreviation"),
         "period": stat.get("period"),
-        # Core
+        # Core ratings & efficiency
         "pie": stat.get("pie"),
         "pace": stat.get("pace"),
         "pace_per_40": stat.get("pace_per_40"),
@@ -364,57 +371,93 @@ def flatten_advanced_stat_v2(stat: Dict) -> Dict:
         "offensive_rating": stat.get("offensive_rating"),
         "defensive_rating": stat.get("defensive_rating"),
         "net_rating": stat.get("net_rating"),
+        "estimated_offensive_rating": stat.get("estimated_offensive_rating"),
+        "estimated_defensive_rating": stat.get("estimated_defensive_rating"),
+        "estimated_net_rating": stat.get("estimated_net_rating"),
         "usage_percentage": stat.get("usage_percentage"),
         "true_shooting_percentage": stat.get("true_shooting_percentage"),
         "effective_field_goal_percentage": stat.get("effective_field_goal_percentage"),
+        # Playmaking
         "assist_percentage": stat.get("assist_percentage"),
         "assist_ratio": stat.get("assist_ratio"),
         "assist_to_turnover": stat.get("assist_to_turnover"),
+        "secondary_assists": stat.get("secondary_assists"),
         "turnover_ratio": stat.get("turnover_ratio"),
+        # Rebounding
         "offensive_rebound_percentage": stat.get("offensive_rebound_percentage"),
         "defensive_rebound_percentage": stat.get("defensive_rebound_percentage"),
         "rebound_percentage": stat.get("rebound_percentage"),
-        # Misc
+        # Misc counting
         "blocks_against": stat.get("blocks_against"),
         "fouls_drawn": stat.get("fouls_drawn"),
         "points_fast_break": stat.get("points_fast_break"),
         "points_off_turnovers": stat.get("points_off_turnovers"),
         "points_paint": stat.get("points_paint"),
         "points_second_chance": stat.get("points_second_chance"),
-        # Scoring
+        # Scoring distribution — assisted/unassisted splits
         "pct_assisted_fgm": stat.get("pct_assisted_fgm"),
         "pct_unassisted_fgm": stat.get("pct_unassisted_fgm"),
+        "pct_assisted_2pt": stat.get("pct_assisted_2pt"),
+        "pct_assisted_3pt": stat.get("pct_assisted_3pt"),
+        "pct_unassisted_2pt": stat.get("pct_unassisted_2pt"),
+        "pct_unassisted_3pt": stat.get("pct_unassisted_3pt"),
         "pct_fga_2pt": stat.get("pct_fga_2pt"),
         "pct_fga_3pt": stat.get("pct_fga_3pt"),
         "pct_pts_2pt": stat.get("pct_pts_2pt"),
         "pct_pts_3pt": stat.get("pct_pts_3pt"),
         "pct_pts_paint": stat.get("pct_pts_paint"),
         "pct_pts_fast_break": stat.get("pct_pts_fast_break"),
+        "pct_pts_free_throw": stat.get("pct_pts_free_throw"),
+        "pct_fgm": stat.get("pct_fgm"),
         # Hustle
         "box_outs": stat.get("box_outs"),
         "charges_drawn": stat.get("charges_drawn"),
         "contested_shots": stat.get("contested_shots"),
+        "contested_shots_2pt": stat.get("contested_shots_2pt"),
+        "contested_shots_3pt": stat.get("contested_shots_3pt"),
         "deflections": stat.get("deflections"),
         "loose_balls_recovered_total": stat.get("loose_balls_recovered_total"),
+        "loose_balls_recovered_off": stat.get("loose_balls_recovered_off"),
+        "loose_balls_recovered_def": stat.get("loose_balls_recovered_def"),
         "screen_assists": stat.get("screen_assists"),
         "screen_assist_points": stat.get("screen_assist_points"),
-        # Defense
+        # Defense — matchup & rim protection
         "matchup_minutes": stat.get("matchup_minutes"),
         "matchup_fg_pct": stat.get("matchup_fg_pct"),
+        "matchup_fga": stat.get("matchup_fga"),
+        "matchup_fgm": stat.get("matchup_fgm"),
         "matchup_player_points": stat.get("matchup_player_points"),
         "defended_at_rim_fg_pct": stat.get("defended_at_rim_fg_pct"),
-        # Tracking
+        "defended_at_rim_fga": stat.get("defended_at_rim_fga"),
+        "defended_at_rim_fgm": stat.get("defended_at_rim_fgm"),
+        # Tracking — movement & shooting
         "speed": stat.get("speed"),
         "distance": stat.get("distance"),
         "touches": stat.get("touches"),
         "passes": stat.get("passes"),
+        "contested_fga": stat.get("contested_fga"),
+        "contested_fgm": stat.get("contested_fgm"),
         "contested_fg_pct": stat.get("contested_fg_pct"),
+        "uncontested_fga": stat.get("uncontested_fga"),
+        "uncontested_fgm": stat.get("uncontested_fgm"),
         "uncontested_fg_pct": stat.get("uncontested_fg_pct"),
-        # Usage
+        # Usage/share percentages
         "pct_fga": stat.get("pct_fga"),
         "pct_points": stat.get("pct_points"),
         "pct_rebounds_total": stat.get("pct_rebounds_total"),
+        "pct_blocks": stat.get("pct_blocks"),
+        "pct_steals": stat.get("pct_steals"),
+        "pct_turnovers": stat.get("pct_turnovers"),
     }
+    
+    # Dynamic overflow: capture any API fields not explicitly listed above.
+    # This future-proofs against new fields the API may add.
+    _skip_keys = {"id", "player", "team", "game", "period"}
+    for key, value in stat.items():
+        if key not in _skip_keys and key not in flat:
+            flat[key] = value
+    
+    return flat
 
 
 def flatten_lineup(lineup: Dict) -> Dict:
@@ -460,7 +503,7 @@ def flatten_play(play: Dict) -> Dict:
 def flatten_player_prop(prop: Dict) -> Dict:
     market = prop.get("market", {}) or {}
     
-    flat = {
+    return {
         "prop_id": prop.get("id"),
         "game_id": prop.get("game_id"),
         "player_id": prop.get("player_id"),
@@ -473,7 +516,6 @@ def flatten_player_prop(prop: Dict) -> Dict:
         "milestone_odds": market.get("odds"),
         "updated_at": prop.get("updated_at"),
     }
-    return flat
 
 
 def flatten_betting_odds(odds: Dict) -> Dict:
@@ -583,8 +625,32 @@ def flatten_team(team: Dict) -> Dict:
     }
 
 
+def flatten_player(player: Dict) -> Dict:
+    team = player.get("team", {}) or {}
+    return {
+        "player_id": player.get("id"),
+        "first_name": player.get("first_name"),
+        "last_name": player.get("last_name"),
+        "player_name": f"{player.get('first_name', '')} {player.get('last_name', '')}".strip(),
+        "position": player.get("position"),
+        "height": player.get("height"),
+        "weight": player.get("weight"),
+        "jersey_number": player.get("jersey_number"),
+        "college": player.get("college"),
+        "country": player.get("country"),
+        "draft_year": player.get("draft_year"),
+        "draft_round": player.get("draft_round"),
+        "draft_number": player.get("draft_number"),
+        "team_id": team.get("id"),
+        "team_abbr": team.get("abbreviation"),
+        "team_name": team.get("full_name"),
+        "team_conference": team.get("conference"),
+        "team_division": team.get("division"),
+    }
+
+
 # ===========================
-# SAVE FUNCTION
+# SAVE / LOAD FUNCTIONS
 # ===========================
 
 def save_df(df: pd.DataFrame, filename: str, output_dir: str):
@@ -595,6 +661,41 @@ def save_df(df: pd.DataFrame, filename: str, output_dir: str):
     df.to_csv(f"{output_dir}/{filename}.csv", index=False)
     df.to_parquet(f"{output_dir}/{filename}.parquet", index=False)
     print(f"  ✅ {len(df):,} records → {filename}")
+
+
+def load_advanced_stats_v2(data_dir: str = "data", glob_pattern: str = "advanced_stats_v2*.csv") -> pd.DataFrame:
+    """Load all advanced_stats_v2 CSV shards with unified schema.
+    
+    Uses pd.concat column union so shards with different column counts
+    (e.g. 59 vs 83) are merged correctly — missing columns become NaN.
+    
+    Usage:
+        df = load_advanced_stats_v2("data")
+        # All shards unified, missing tracking/defense fields are NaN
+    """
+    data_path = Path(data_dir)
+    shards = []
+    
+    for f in sorted(data_path.glob(glob_pattern)):
+        shard = pd.read_csv(f)
+        shard["_source_file"] = f.name  # track provenance
+        shards.append(shard)
+    
+    if not shards:
+        print(f"  ⚠️  No advanced_stats_v2 files found in {data_dir}")
+        return pd.DataFrame()
+    
+    # Column union: missing columns across shards become NaN
+    df = pd.concat(shards, ignore_index=True, sort=False)
+    
+    # Report schema differences if any
+    col_counts = {s["_source_file"].iloc[0]: len(s.columns) for s in shards}
+    unique_counts = set(col_counts.values())
+    if len(unique_counts) > 1:
+        print(f"  ℹ️  Schema union applied — shard column counts: {col_counts}")
+    
+    print(f"  ✅ Loaded {len(df):,} advanced stats from {len(shards)} shards ({len(df.columns)} columns)")
+    return df
 
 
 # ===========================
@@ -628,7 +729,6 @@ def backfill_stats(client, output_dir, game_ids=None, start_date=None, end_date=
     
     df = pd.DataFrame([flatten_stat(s) for s in stats])
     
-    # Filter to team if specified
     if team_id:
         team_df = df[df["team_id"] == team_id].copy()
         opp_df = df[df["team_id"] != team_id].copy()
@@ -757,7 +857,6 @@ def backfill_season_averages(client, season, output_dir, team_id=None, team_abbr
         ("hustle", None),
     ]
     
-    # Get player IDs for team if filtering
     player_ids = None
     if team_id:
         players = client.get_active_players([team_id])
@@ -810,6 +909,7 @@ def backfill_team_season_averages(client, season, output_dir, team_id=None, team
             print(f"    ⚠️  {category}/{stat_type}: {e}")
     
     if not all_avgs:
+        print("  No team season averages found")
         return pd.DataFrame()
     
     df = pd.DataFrame(all_avgs)
@@ -822,6 +922,7 @@ def backfill_standings(client, season, output_dir):
     print(f"\n🏆 STANDINGS for {season}")
     standings = client.get_standings(season)
     if not standings:
+        print("  No standings found")
         return pd.DataFrame()
     df = pd.DataFrame([flatten_standing(s) for s in standings])
     save_df(df, f"standings_{season}", output_dir)
@@ -857,6 +958,7 @@ def backfill_leaders(client, season, output_dir):
         all_leaders.extend(leaders)
     
     if not all_leaders:
+        print("  No leaders found")
         return pd.DataFrame()
     
     df = pd.DataFrame([flatten_leader(l) for l in all_leaders])
@@ -868,10 +970,27 @@ def backfill_teams(client, output_dir):
     print(f"\n🏀 TEAMS")
     teams = client.get_teams()
     if not teams:
+        print("  No teams found")
         return pd.DataFrame()
     df = pd.DataFrame([flatten_team(t) for t in teams])
-    df = df[df["team_id"] <= 30]  # Current teams only
+    df = df[df["team_id"] <= 30]
     save_df(df, "teams", output_dir)
+    return df
+
+
+def backfill_players(client, output_dir, team_id=None, team_abbr=None):
+    label = f" ({team_abbr})" if team_abbr else ""
+    print(f"\n👤 PLAYERS{label}")
+    
+    team_ids = [team_id] if team_id else None
+    players = client.get_active_players(team_ids)
+    if not players:
+        print("  No players found")
+        return pd.DataFrame()
+    
+    df = pd.DataFrame([flatten_player(p) for p in players])
+    suffix = f"_{team_abbr}" if team_abbr else ""
+    save_df(df, f"players{suffix}", output_dir)
     return df
 
 
@@ -887,7 +1006,6 @@ def run_full_backfill(client, start_date, end_date, season, output_dir, team_id=
     
     start_time = time.time()
     
-    # Games
     games_df = backfill_games(client, start_date, end_date, season, output_dir, team_id, team_abbr)
     game_ids = games_df["game_id"].tolist() if not games_df.empty else []
     
@@ -903,6 +1021,7 @@ def run_full_backfill(client, start_date, end_date, season, output_dir, team_id=
     backfill_injuries(client, output_dir, team_id, team_abbr)
     backfill_season_averages(client, season, output_dir, team_id, team_abbr)
     backfill_team_season_averages(client, season, output_dir, team_id, team_abbr)
+    backfill_players(client, output_dir, team_id, team_abbr)
     
     if not team_id:
         backfill_leaders(client, season, output_dir)
@@ -964,23 +1083,23 @@ EXAMPLES:
 
   # Season averages for Celtics
   python nba_balldontlie_backfill_v2.py --season 2025 --season-averages --team BOS
+
+  # Load all advanced stats shards (handles schema differences):
+  #   from nba_balldontlie_backfill_v2 import load_advanced_stats_v2
+  #   df = load_advanced_stats_v2("data")
         """
     )
     
-    # Date/season
     parser.add_argument("--start", type=str, help="Start date (YYYY-MM-DD)")
     parser.add_argument("--end", type=str, help="End date (YYYY-MM-DD)")
     parser.add_argument("--season", type=int, default=2025, help="Season year (default: 2025)")
     
-    # Team filter
     parser.add_argument("--team", type=str, help="Team abbreviation (e.g., LAL, BOS, GSW)")
     parser.add_argument("--team-id", type=int, help="Team ID (1-30)")
     
-    # Modes
     parser.add_argument("--full", action="store_true", help="Full backfill (all endpoints)")
     parser.add_argument("--daily", action="store_true", help="Daily backfill (essential endpoints)")
     
-    # Individual endpoints
     parser.add_argument("--games", action="store_true", help="Games")
     parser.add_argument("--stats", action="store_true", help="Player stats")
     parser.add_argument("--advanced-v2", action="store_true", help="Advanced stats V2 (100+ metrics)")
@@ -994,8 +1113,8 @@ EXAMPLES:
     parser.add_argument("--season-averages", action="store_true", help="Season averages")
     parser.add_argument("--team-season-averages", action="store_true", help="Team season averages")
     parser.add_argument("--teams", action="store_true", help="Teams reference")
+    parser.add_argument("--players", action="store_true", help="Active player roster")
     
-    # Output
     parser.add_argument("--output", type=str, default="data", help="Output directory")
     
     args = parser.parse_args()
@@ -1004,7 +1123,6 @@ EXAMPLES:
         print("❌ BALLDONTLIE_API_KEY not found in .env")
         return
     
-    # Resolve team
     team_id = None
     team_abbr = None
     
@@ -1030,13 +1148,11 @@ EXAMPLES:
     start_date = args.start or today
     end_date = args.end or today
     
-    # Modes
     if args.full:
         run_full_backfill(client, start_date, end_date, args.season, output_dir, team_id, team_abbr)
     elif args.daily:
         run_daily_backfill(client, start_date, end_date, args.season, output_dir, team_id, team_abbr)
     else:
-        # Individual endpoints
         game_ids = []
         
         if args.games:
@@ -1080,10 +1196,13 @@ EXAMPLES:
         if args.teams:
             backfill_teams(client, output_dir)
         
-        # No flags = help
+        if args.players:
+            backfill_players(client, output_dir, team_id, team_abbr)
+        
         if not any([args.games, args.stats, args.advanced_v2, args.lineups, args.pbp,
                     args.player_props, args.odds, args.standings, args.injuries,
-                    args.leaders, args.season_averages, args.team_season_averages, args.teams]):
+                    args.leaders, args.season_averages, args.team_season_averages, 
+                    args.teams, args.players]):
             parser.print_help()
 
 
